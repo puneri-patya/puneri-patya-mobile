@@ -134,11 +134,16 @@ const styles = StyleSheet.create({
     },
     time: {
         fontSize: 11,
-        color: "#808080",
+        color: "#505050",
+        fontFamily: 'MuseoModerno-Light',
+        // color: '#fff',
+        marginTop: -5,
     },
     name: {
+        fontFamily: 'MuseoModerno-SemiBold',
         fontSize: 13,
         fontWeight: "bold",
+        // color: '#fff'
     },
     row: {
         display: 'flex',
@@ -153,6 +158,8 @@ const styles = StyleSheet.create({
     },
     comment: {
         marginTop: 8,
+        fontFamily: 'MuseoModerno-Regular',
+        // color: '#fff',
     },
     rightAligned: {
         position: 'absolute',

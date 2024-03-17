@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity, ActivityIndicator, Platform, Alert, TouchableNativeFeedback, Dimensions, FlatList, KeyboardAvoidingView, TextInput } from 'react-native';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { View, Text, StyleSheet, Image, TouchableOpacity, ActivityIndicator, Platform, Alert, TouchableNativeFeedback, Dimensions, FlatList, KeyboardAvoidingView, TextInput, Linking } from 'react-native';
 import { Ionicons, MaterialCommunityIcons, Octicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 
@@ -13,6 +13,8 @@ import * as postActions from '../../store/actions/posts';
 import { showMessage } from "react-native-flash-message";
 import VerifiedUser from '../../constants/VerifiedUser';
 import NewComment from './NewComment';
+import { reverseGeocodeAsync } from 'expo-location';
+import Styles from '../../constants/Styles';
 
 const Card = (props) => {
     const { post, userId, fromUserProfile } = props;
@@ -27,6 +29,7 @@ const Card = (props) => {
     const [imgWidth, setImgWidth] = useState();
     const [imgHeight, setImgHeight] = useState();
     const [isRefreshing, setIsRefreshing] = useState(false);
+    const [locationDetails, setLocationDetails] = useState('');
 
     const onImageErrorHandler = () => {
         setImageUri(ENV.defaultImageUri)
@@ -70,7 +73,7 @@ const Card = (props) => {
     }
 
     const checkComment = () => {
-        console.log('post.comments', post.comments)
+        //console.log('post.comments', post.comments)
         let match = post.comments.filter(v => v.postedBy._id == userId).length > 0;
         return match;
     }
@@ -93,6 +96,16 @@ const Card = (props) => {
     const toggleLike = async () => {
         props.toggleLikeHandler(post._id, checkLike());
     }
+    const openMap = () => {
+        const scheme = Platform.select({ ios: 'maps://0,0?q=', android: 'geo:0,0?q=' });
+        const latLng = `${post.latitude},${post.longitude}`;
+        const label = post.title;
+        const url = Platform.select({
+            ios: `${scheme}${label}@${latLng}`,
+            android: `${scheme}${latLng}(${label})`
+        });
+        Linking.openURL(url);
+    }
 
     useEffect(() => {
         let imageUrl = `${ENV.apiUrl}/post/photo/${post._id}?${new Date(post.updated)}`;
@@ -104,7 +117,18 @@ const Card = (props) => {
             setImgWidth(screenWidth);
             setImgHeight(imageHeight);
         })
+
     }, [])
+
+    useEffect(() => {
+        const doIt = async () => {
+            const loc = await reverseGeocodeAsync({ latitude: post.latitude, longitude: post.longitude });
+            console.log('loc', loc)
+            const address = [loc[0].name, loc[0].streetNumber, loc[0].street, loc[0].city, loc[0].region, loc[0].country];
+            setLocationDetails(address.filter(Boolean).join(', '));
+        };
+        doIt();
+    }, []);
 
 
     return (
@@ -156,19 +180,32 @@ const Card = (props) => {
                     />
                 </View>
                 <View style={styles.cardHeader}>
-                    <View>
+                    <View style={{ width: '100%' }}>
                         <Text style={styles.title}>{post.title || ""}</Text>
                         <View>
                             <Text style={styles.description}>
                                 {!showFullBody ? post.body : getDisplayableDescription(post.body).val}
                                 <Text
-                                    style={{ color: Colors.linkColor }}
+                                    style={{ color: Colors.primary }}
                                     onPress={() => setShowFullBody((prevState) => !prevState)}
                                 >{getDisplayableDescription(post.body).truncated ? showFullBody ? ' Read More' : ' Read Less' : ''}
                                 </Text>
                             </Text>
                         </View>
+                        <TouchableOpacity
+                            style={Styles.locationContainer}
+                            onPress={openMap}
+                        >
+                            <Ionicons
+                                name={`location-outline`}
+                                size={24}
+                                style={{ marginRight: 5 }}
+                                color={Colors.primary}
+                            />
+                            <Text style={Styles.location}> {locationDetails} </Text>
+                        </TouchableOpacity>
                     </View>
+
                 </View>
 
                 <View style={styles.cardFooter}>
@@ -208,7 +245,7 @@ const Card = (props) => {
                         style={styles.root}
                         onRefresh={loadPosts}
                         refreshing={isRefreshing}
-                        data={post.comments.sort((a, b) => new Date(b.created) - new Date(a.created)).filter((k,i) => i < 2)}
+                        data={post.comments.sort((a, b) => new Date(b.created) - new Date(a.created)).filter((k, i) => i < 2)}
                         ItemSeparatorComponent={() => {
                             return (
                                 <View style={styles.separator} />
@@ -224,33 +261,20 @@ const Card = (props) => {
                             );
                         }}
                     />
-                    <NewComment userId={userId} postId={post._id}/>
-                    
+                    <NewComment userId={userId} postId={post._id} />
+
                 </View>
 
                 {post.comments.length > 2 && (
-                <TouchableOpacity
-                    onPress={() => navigation.navigate('Comments', { postId: post._id, userId: userId })}
-                >
-                    <Text style={styles.commentBar}>{`View all ${post.comments.length} comments`}</Text>
-                </TouchableOpacity>
+                    <TouchableOpacity
+                        onPress={() => navigation.navigate('Comments', { postId: post._id, userId: userId })}
+                    >
+                        <Text style={styles.commentBar}>{`View all ${post.comments.length} comments`}</Text>
+                    </TouchableOpacity>
                 )}
                 {post.postedBy._id === userId && (
+
                     <View style={styles.postActions} >
-                        <View style={styles.socialBarSection}>
-                            <TouchableOpacity
-                                style={styles.socialBarButton}
-                                onPress={deleteHandler.bind(this, post._id)}
-                            >
-                                <MaterialCommunityIcons
-                                    name="delete"
-                                    size={20}
-                                    style={{ marginRight: 5 }}
-                                    color="red"
-                                />
-                                <Text style={styles.socialBarLabel}>Delete</Text>
-                            </TouchableOpacity>
-                        </View>
                         <View style={styles.socialBarSection}>
                             <TouchableOpacity
                                 style={styles.socialBarButton}
@@ -262,9 +286,24 @@ const Card = (props) => {
                                     style={{ marginRight: 5 }}
                                     color={Colors.lightAccent}
                                 />
-                                <Text style={styles.socialBarLabel}>Edit</Text>
+                                <Text style={styles.socialBarLabel}>Edit This Pati</Text>
                             </TouchableOpacity>
                         </View>
+                        <View style={styles.socialBarSection}>
+                            <TouchableOpacity
+                                style={styles.socialBarButton}
+                                onPress={deleteHandler.bind(this, post._id)}
+                            >
+                                <MaterialCommunityIcons
+                                    name="delete"
+                                    size={20}
+                                    style={{ marginRight: 5 }}
+                                    color={Colors.heartColor}
+                                />
+                                <Text style={styles.socialBarLabel}>Delete This Pati</Text>
+                            </TouchableOpacity>
+                        </View>
+
                     </View>
                 )}
 
@@ -297,7 +336,7 @@ const styles = StyleSheet.create({
         marginVertical: 8,
         backgroundColor: Colors.cardBackground,
         margin: 4,
-        borderColor: '#c2c2c2',
+        borderColor: Colors.cardBorder,
         borderWidth: 1,
         borderRadius: 8
 
@@ -314,6 +353,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 10,
         flexDirection: 'row',
         justifyContent: 'space-between',
+        width: '100%',
     },
     cardContent: {
         paddingVertical: 12.5,
@@ -332,7 +372,8 @@ const styles = StyleSheet.create({
     commentBar: {
         paddingHorizontal: 10,
         paddingBottom: 15,
-        paddingTop: 5
+        paddingTop: 5,
+        fontFamily: 'MuseoModerno-Light',
     },
     cardImageContainer: {
         backgroundColor: '#c2c2c2',
@@ -358,15 +399,32 @@ const styles = StyleSheet.create({
     },
 
     /******** card components **************/
+    userName: {
+        fontFamily: 'MuseoModerno-SemiBold',
+        fontSize: 16,
+        marginTop: -5
+    },
+    timeDetails: {
+        fontFamily: 'MuseoModerno-Light',
+        fontSize: 11,
+        color: Colors.primary,
+        marginTop: -2
+    },
+    timeIcon: {
+        marginTop: 2
+    },
     title: {
+        fontFamily: 'MuseoModerno-SemiBold',
         fontSize: 16,
         flex: 1,
     },
     description: {
-        fontSize: 14,
+        fontFamily: 'MuseoModerno-Light',
+        fontSize: 13,
         color: "#888",
         flex: 1,
         marginVertical: 5,
+        marginTop: -2,
     },
     time: {
         fontSize: 13,
@@ -387,18 +445,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         flex: 1,
     },
-    userName: {
-        fontWeight: '600',
-        fontSize: 15,
-        marginTop: -2
-    },
-    timeDetails: {
-        fontSize: 12,
-        color: Colors.accent,
-    },
-    timeIcon: {
-        marginTop: 2
-    },
+
     /******** social bar ******************/
     socialBarContainer: {
         flexDirection: 'row'
@@ -406,9 +453,10 @@ const styles = StyleSheet.create({
     socialBarSection: {
         marginRight: 20
     },
-    socialBarlabel: {
-        marginLeft: 20,
-        fontWeight: 'bold',
+    socialBarLabel: {
+        fontFamily: 'MuseoModerno-SemiBold',
+        fontSize: 14,
+        marginLeft: 0,
     },
     socialBarButton: {
         flexDirection: 'row',

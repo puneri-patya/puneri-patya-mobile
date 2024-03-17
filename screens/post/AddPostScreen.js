@@ -29,9 +29,10 @@ const AddPostScreen = (props) => {
     const [imageSize, setImageSize] = useState(0);
     const [isTitleFocused, setIsTitleFocused] = useState(false);
     const [isDescFocused, setIsDescFocused] = useState(false);
+    const [locationAddress, setLocationAddress] = useState('');
 
     const [isLoading, setIsLoading] = useState(false);
-    const [location, setLocation] = useState({ latitude: 0, longitude: 0, latitudeDelta: 0, longitudeDelta: 0 });
+    const [location, setLocation] = useState({ latitude: 0, longitude: 0 });
 
     const dispatch = useDispatch();
 
@@ -43,61 +44,58 @@ const AddPostScreen = (props) => {
         setBase64Data('');
         setImageType('');
         setIsLoading(false);
+        setLocationAddress('');
     }
 
     useEffect(() => {
-        const unsubscribe = props.navigation.addListener('focus', clearForm);
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition((position) => { position.coords.latitude, position.coords.longitude })
-        } else {
-            async function getLocation() {
-                let { status } = await Location.requestForegroundPermissionsAsync();
-                if (status !== 'granted') {
-                    console.error('Permission to access location was denied');
-                    showMessage({
-                        message: "Location not enabled. Please enable location to post.",
-                        type: "danger",
-                        duration: 3000,
-                        icon: { icon: "danger", position: 'left' }
-                    });
-                    return;
-                }
-
-                let location = await Location.getCurrentPositionAsync({});
-                console.log(location);
+        async function getLocation() {
+            let { status } = await Location.requestForegroundPermissionsAsync();
+            if (status !== 'granted') {
+                console.error('Permission to access location was denied');
                 showMessage({
-                    message: "Location enabled.",
-                    type: "success",
+                    message: "Location not enabled. Please enable location to post.",
+                    type: "danger",
                     duration: 3000,
-                    icon: { icon: "success", position: 'left' }
+                    icon: { icon: "danger", position: 'left' }
                 });
+                return;
             }
 
-            // Call the function to get the location
-            getLocation();
-
+            let location = await Location.getCurrentPositionAsync({});
+            setLocationDetails(location.coords);
+            //setLocation({ latitude: location.coords.latitude, longitude: location.coords.longitude });
+            //console.log(location);
+            //const locationDetails = await Location.reverseGeocodeAsync({ latitude: location.coords.latitude, longitude: location.coords.longitude });
+            //const address = locationDetails[0].name + ", " + locationDetails[0].city + ", " + locationDetails[0].region + ", " + locationDetails[0].country;
+            //setLocationAddress(address);
+            // AIzaSyAQoy_pJjp4kakZ3x2isDGQRZAYiUMO8b4
+            // showMessage({
+            //     message: "Location enabled.",
+            //     type: "success",
+            //     duration: 3000,
+            //     icon: { icon: "success", position: 'left' }
+            // });
         }
+
+        // Call the function to get the location
+        getLocation();
+    }, []);
+
+    useEffect(() => {
+        const unsubscribe = props.navigation.addListener('focus', clearForm);
         return () => {
             unsubscribe();
         };
     }, [clearForm])
 
+    const setLocationDetails = async (location) => {
+        setLocation({ latitude: location.latitude, longitude: location.longitude });
+        const locationDetails = await Location.reverseGeocodeAsync({ latitude: location.latitude, longitude: location.longitude });
+        const address = locationDetails[0].name + ", " + locationDetails[0].city + ", " + locationDetails[0].region + ", " + locationDetails[0].country;
+        setLocationAddress(address);
+    }
+
     const validatePost = () => {
-        let strLength = base64Data.length;
-        let sizeInBytes = 4 * Math.ceil((strLength / 3)) * 0.5624896334383812;
-        let sizeInKb = sizeInBytes / 1000;
-        console.log(sizeInKb);
-        // if(sizeInKb > 2000){
-        //     showMessage({
-        //         message: "Image size should be less than 150KB.",
-        //         type: "danger",
-        //         duration: 3000,
-        //         icon: { icon: "danger", position: 'left' }
-        //     });
-        //     return false;
-        // }
-
-
         if (!title || title.length === 0) {
             showMessage({
                 message: "Please enter a title.",
@@ -134,7 +132,7 @@ const AddPostScreen = (props) => {
         if (validatePost()) {
             console.log("VALID POST")
             try {
-                await dispatch(postActions.createPost(title, body, base64Data, imageType));
+                await dispatch(postActions.createPost(title, body, base64Data, imageType, location));
                 clearForm();
                 props.navigation.navigate('AllPosts')
                 showMessage({
@@ -160,31 +158,12 @@ const AddPostScreen = (props) => {
         setBase64Data(base64);
         setImageType(imageType);
         setImageSize(imageSize);
-        console.log(imageSize);
     }
 
     return (
-        <ScrollView  >
+        <ScrollView style={{ backgroundColor: Colors.cardBackground }} >
             <KeyboardAvoidingView style={styles.screen} behavior="padding" >
                 <View style={styles.container}>
-                    <ImgPicker
-                        onImageTaken={imagePickedHandler}
-                        clearPickedImage={clearPickedImage}
-                    />
-                    <View style={styles.labelContainer} >
-                        <Text style={styles.labelText} >Where is this pati located?</Text>
-                    </View>
-                    <View style={styles.noImagePreview} >
-                        <MapView
-                            style={styles.map}
-                            followsUserLocation={true}
-                            showsUserLocation={true}
-                            initialRegion={location}
-                        >
-
-                        </MapView>
-                        {/* <Text style={styles.noPreviewText}>Choose Pati First</Text> */}
-                    </View>
                     <View style={styles.labelContainer} >
                         <Text style={styles.labelText} >Title</Text>
                     </View>
@@ -198,6 +177,40 @@ const AddPostScreen = (props) => {
                             onChangeText={(text) => setTitle(text)}
                         />
                     </View>
+                    <ImgPicker
+                        onImageTaken={imagePickedHandler}
+                        clearPickedImage={clearPickedImage}
+                    />
+                    <View style={styles.labelContainer} >
+                        <Text style={styles.labelText} >Where is this pati located?</Text>
+                    </View>
+                    <View style={styles.noImagePreview} >
+                        <MapView
+                            style={styles.map}
+                            followsUserLocation={true}
+                            region={location}
+                        >
+                            <Marker
+                                draggable
+                                coordinate={location}
+                                title={title || 'New Pati'}
+                                description={'Location of Pati'}
+                                onDragEnd={(e) => setLocationDetails(e.nativeEvent.coordinate)}
+                            />
+                        </MapView>
+                    </View>
+
+                    <View style={styles.inputContainer}>
+                        <TextInput style={styles.mapInput}
+                            placeholder="Location of pati."
+                            underlineColorAndroid='transparent'
+                            multiline
+                            numberOfLines={2}
+                            value={locationAddress}
+                            editable={false}
+                        />
+                    </View>
+
                     <View style={styles.labelContainer} >
                         <Text style={styles.labelText} >Description</Text>
                     </View>
@@ -243,7 +256,7 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'left',
         alignItems: 'left',
-        marginTop: 20,
+        marginTop: 10,
         marginHorizontal: 20,
     },
     container: {
@@ -284,7 +297,8 @@ const styles = StyleSheet.create({
         fontSize: 14,
         fontWeight: 'bold',
         paddingVertical: 8,
-        color: Colors.primary
+        color: Colors.primary,
+        fontFamily: 'MuseoModerno-SemiBold'
     },
     inputContainer: {
         backgroundColor: '#FFFFFF',
@@ -328,7 +342,8 @@ const styles = StyleSheet.create({
         borderBottomColor: '#FFFFFF',
         flex: 1,
         paddingRight: 10,
-        textAlignVertical: 'top'
+        textAlignVertical: 'top',
+        fontFamily: 'MuseoModerno-Light',
     },
     descriptionInput: {
         height: 90,
@@ -337,7 +352,18 @@ const styles = StyleSheet.create({
         flex: 1,
         paddingRight: 10,
         marginTop: 8,
-        textAlignVertical: 'top'
+        textAlignVertical: 'top',
+        fontFamily: 'MuseoModerno-Light',
+    },
+    mapInput: {
+        height: 60,
+        marginLeft: 10,
+        borderBottomColor: '#FFFFFF',
+        flex: 1,
+        paddingRight: 10,
+        marginTop: 8,
+        textAlignVertical: 'top',
+        fontFamily: 'MuseoModerno-Light',
     },
 
     buttonContainer: {
@@ -364,7 +390,8 @@ const styles = StyleSheet.create({
     },
     loginText: {
         color: 'white',
-        fontWeight: 'bold'
+        fontWeight: 'bold',
+        fontFamily: 'MuseoModerno-SemiBold'
     },
     noImagePreview: {
         width: '100%',

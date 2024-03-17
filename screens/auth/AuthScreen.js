@@ -23,7 +23,7 @@ import Colors from '../../constants/Colors';
 import * as Notifications from 'expo-notifications';
 import * as Permissions from 'expo-permissions';
 import Constants from 'expo-constants';
-import LinearGradient from 'react-native-linear-gradient';
+import LinearGradient from 'expo-linear-gradient';
 
 
 const AuthScreen = (props) => {
@@ -402,50 +402,50 @@ const AuthScreen = (props) => {
 
     return (
         <View style={styles.container}>
-            <LinearGradient colors={['#ffffff', '#e3e9f2', '#5b94f7', '#bd3a3f']} locations={[0, 0.40, 0.64, 1]} style={styles.container}>
-                <View style={styles.topComponent} >
-                    <Text style={styles.msgText}></Text>
-                </View>
-                <View style={styles.titleContainer} >
-                    <Image source={require('../../assets/logo.png')} />
-                </View>
+            {/* <LinearGradient colors={['#ffffff', '#e3e9f2', '#5b94f7', '#bd3a3f']} locations={[0, 0.40, 0.64, 1]} style={styles.container}> */}
+            <View style={styles.topComponent} >
+                <Text style={styles.msgText}></Text>
+            </View>
+            <View style={styles.titleContainer} >
+                <Image source={require('../../assets/logo.png')} />
+            </View>
 
-                {isSignup && (
-                    <View style={styles.inputContainer}>
-                        <TextInput style={styles.inputs}
-                            placeholder="Name"
-                            underlineColorAndroid='transparent'
-                            value={name}
-                            onChangeText={(text) => inputChangeHandler(text, 1)}
-                        />
-                        <Image style={styles.inputIcon} source={{ uri: 'https://img.icons8.com/nolan/40/000000/name.png' }} />
-                    </View>
-                )}
-
+            {isSignup && (
                 <View style={styles.inputContainer}>
                     <TextInput style={styles.inputs}
-                        placeholder="Email"
-                        secureTextEntry={false}
-                        keyboardType="email-address"
+                        placeholder="Name"
                         underlineColorAndroid='transparent'
-                        value={email}
-                        onChangeText={(text) => inputChangeHandler(text, 2)}
+                        value={name}
+                        onChangeText={(text) => inputChangeHandler(text, 1)}
                     />
-                    <Image style={styles.inputIcon} source={{ uri: 'https://img.icons8.com/nolan/40/000000/email.png' }} />
+                    <Image style={styles.inputIcon} source={{ uri: 'https://img.icons8.com/nolan/40/000000/name.png' }} />
                 </View>
+            )}
 
-                <View style={styles.inputContainer}>
-                    <TextInput style={styles.inputs}
-                        placeholder="Password"
-                        secureTextEntry={true}
-                        underlineColorAndroid='transparent'
-                        value={password}
-                        onChangeText={(text) => inputChangeHandler(text, 3)}
-                    />
-                    <Image style={styles.inputIcon} source={{ uri: 'https://img.icons8.com/nolan/40/000000/key.png' }} />
-                </View>
+            <View style={styles.inputContainer}>
+                <TextInput style={styles.inputs}
+                    placeholder="Email"
+                    secureTextEntry={false}
+                    keyboardType="email-address"
+                    underlineColorAndroid='transparent'
+                    value={email}
+                    onChangeText={(text) => inputChangeHandler(text, 2)}
+                />
+                <Image style={styles.inputIcon} source={{ uri: 'https://img.icons8.com/nolan/40/000000/email.png' }} />
+            </View>
 
-                {!isSignup && (
+            <View style={styles.inputContainer}>
+                <TextInput style={styles.inputs}
+                    placeholder="Password"
+                    secureTextEntry={true}
+                    underlineColorAndroid='transparent'
+                    value={password}
+                    onChangeText={(text) => inputChangeHandler(text, 3)}
+                />
+                <Image style={styles.inputIcon} source={{ uri: 'https://img.icons8.com/nolan/40/000000/key.png' }} />
+            </View>
+
+            {!isSignup && (
                 <TouchableOpacity
                     onPress={() => props.navigation.navigate('ForgotPassword')}
                     style={styles.btnForgotPassword}
@@ -453,37 +453,37 @@ const AuthScreen = (props) => {
                     <Text style={styles.blackText}>Forgot your password?</Text>
                 </TouchableOpacity>)}
 
-                <TouchableOpacity
-                    style={[styles.buttonContainer, styles.loginButton]}
-                    onPress={AuthHandler}
-                >
+            <TouchableOpacity
+                style={[styles.buttonContainer, styles.loginButton]}
+                onPress={AuthHandler}
+            >
 
-                    {isLoading ? (
-                        <ActivityIndicator size="small" color="#fff" />
-                    ) : (
-                        <Text style={styles.whiteText}>
-                            {isSignup ? "Register" : "Login"}
-                        </Text>
-                    )}
-
-                </TouchableOpacity>
-
-
-                <TouchableOpacity
-                    style={[styles.buttonContainer, styles.registerButton]}
-                    onPress={() => {
-                        setIsSignUp(prevState => !prevState);
-                    }}
-                >
-                    <Text style={styles.whiteText} >
-                        {isSignup ? "Already a user ? Login" : "Don't have an account ? Register"}
+                {isLoading ? (
+                    <ActivityIndicator size="small" color="#fff" />
+                ) : (
+                    <Text style={styles.whiteText}>
+                        {isSignup ? "Register" : "Login"}
                     </Text>
-                </TouchableOpacity>
-                {!isSignup && (
+                )}
+
+            </TouchableOpacity>
+
+
+            <TouchableOpacity
+                style={[styles.buttonContainer, styles.registerButton]}
+                onPress={() => {
+                    setIsSignUp(prevState => !prevState);
+                }}
+            >
+                <Text style={styles.whiteText} >
+                    {isSignup ? "Already a user ? Login" : "Don't have an account ? Register"}
+                </Text>
+            </TouchableOpacity>
+            {!isSignup && (
                 <View style={styles.titleContainer} >
                     <Image source={require('../../assets/pati.gif')} style={styles.pati} />
                 </View>)}
-            </LinearGradient>
+            {/* </LinearGradient> */}
         </View>
     );
 }

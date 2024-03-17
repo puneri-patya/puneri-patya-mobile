@@ -14,7 +14,7 @@ import { showMessage } from "react-native-flash-message";
 import * as authActions from '../../store/actions/auth';
 import { useDispatch } from 'react-redux';
 import Colors from '../../constants/Colors';
-import LinearGradient from 'react-native-linear-gradient';
+import LinearGradient from 'expo-linear-gradient';
 
 const ForgotPasswordScreen = () => {
 
@@ -67,40 +67,40 @@ const ForgotPasswordScreen = () => {
 
     return (
         <View style={styles.container}>
-            <LinearGradient colors={['#ffffff', '#e3e9f2', '#5b94f7', '#bd3a3f']} locations={[0, 0.40, 0.64, 1]} style={styles.container}>
-                <View style={styles.topComponent} >
-                    <Text style={styles.msgText}></Text>
-                </View>
-                <View style={styles.titleContainer} >
-                    <Image source={require('../../assets/logo.png')} />
-                </View>
-                <View style={styles.padding20} ><Text>&nbsp;</Text></View>
-                <View style={styles.inputContainer}>
-                    <TextInput style={styles.inputs}
-                        placeholder="Email"
-                        keyboardType="email-address"
-                        underlineColorAndroid='transparent'
-                        value={email}
-                        onChangeText={(text) => setEmail(text)}
-                    />
-                    <Image style={styles.inputIcon} source={{ uri: 'https://img.icons8.com/nolan/40/000000/email.png' }} />
-                </View>
+            {/* <LinearGradient colors={['#ffffff', '#e3e9f2', '#5b94f7', '#bd3a3f']} locations={[0, 0.40, 0.64, 1]} style={styles.container}> */}
+            <View style={styles.topComponent} >
+                <Text style={styles.msgText}></Text>
+            </View>
+            <View style={styles.titleContainer} >
+                <Image source={require('../../assets/logo.png')} />
+            </View>
+            <View style={styles.padding20} ><Text>&nbsp;</Text></View>
+            <View style={styles.inputContainer}>
+                <TextInput style={styles.inputs}
+                    placeholder="Email"
+                    keyboardType="email-address"
+                    underlineColorAndroid='transparent'
+                    value={email}
+                    onChangeText={(text) => setEmail(text)}
+                />
+                <Image style={styles.inputIcon} source={{ uri: 'https://img.icons8.com/nolan/40/000000/email.png' }} />
+            </View>
 
-                <TouchableOpacity
-                    style={[styles.buttonContainer, styles.loginButton]}
-                    onPress={AuthHandler}
-                >
+            <TouchableOpacity
+                style={[styles.buttonContainer, styles.loginButton]}
+                onPress={AuthHandler}
+            >
 
-                    {isLoading ? (
-                        <ActivityIndicator size="small" color="#fff" />
-                    ) : (
-                        <Text style={styles.whiteText}>
-                            Send Password Reset Link
-                        </Text>
-                    )}
+                {isLoading ? (
+                    <ActivityIndicator size="small" color="#fff" />
+                ) : (
+                    <Text style={styles.whiteText}>
+                        Send Password Reset Link
+                    </Text>
+                )}
 
-                </TouchableOpacity>
-            </LinearGradient>
+            </TouchableOpacity>
+            {/* </LinearGradient> */}
         </View>
     );
 }

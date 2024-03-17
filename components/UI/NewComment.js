@@ -40,7 +40,7 @@ const NewComment = (props) => {
     }
 
     const createCommentHandler = async () => {
-        if(text.length === 0){
+        if (text.length === 0) {
             Alert.alert(
                 'Please enter some text',
                 'Cannot create empty comment',
@@ -72,7 +72,7 @@ const NewComment = (props) => {
                 />
             </TouchableOpacity>
 
-            <View style={isFocused?styles.content_focused:styles.content}>
+            <View style={isFocused ? styles.content_focused : styles.content}>
                 <KeyboardAvoidingView style={styles.row}>
                     <View style={styles.inputContainer}>
                         <TextInput style={styles.inputs}
@@ -92,10 +92,10 @@ const NewComment = (props) => {
                                     <ActivityIndicator size="small" color="white" />
                                 ) : (
                                     <MaterialCommunityIcons
-                                name="send"
-                                size={20}
-                                color={Colors.heartColor}
-                            />
+                                        name="send"
+                                        size={20}
+                                        color={Colors.heartColor}
+                                    />
                                 )}
                             </TouchableOpacity>
                         </View>
@@ -119,10 +119,10 @@ const styles = StyleSheet.create({
     content: {
         marginLeft: 10,
         flex: 1,
-        backgroundColor: Colors.commentColor,
+        backgroundColor: Colors.newCommnetColor,
         padding: 8,
         borderRadius: 8,
-        borderColor: Colors.commentColor,
+        borderColor: Colors.newCommentBorderColor,
         borderWidth: 2,
         // borderTopEndRadius: 8,
     },
@@ -131,7 +131,7 @@ const styles = StyleSheet.create({
         borderWidth: 2,
         marginLeft: 10,
         flex: 1,
-        backgroundColor: Colors.commentColor,
+        backgroundColor: Colors.newCommnetColor,
         padding: 8,
         borderRadius: 8,
     },
@@ -182,20 +182,20 @@ const styles = StyleSheet.create({
         alignItems: 'left',
         marginLeft: 4,
     },
-    
+
     postButtonContainer: {
-        position: 'absolute', 
-        right: 4, 
-        // height: 45,
-        width: '15%' ,
-        // borderColor: 'red',
-        // borderWidth: 1, 
-        backgroundColor: 'transparent', 
-        // padding: 5, 
-        display: 'flex', 
-        justifyContent: 'flex-end',
-        alignItems: 'flex-end'
-    }
+        position: 'absolute',
+        right: 4,
+        backgroundColor: 'transparent',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'flex-end,'
+    },
+    inputs: {
+        display: 'flex',
+        fontFamily: 'MuseoModerno-Light',
+        fontSize: 12,
+    },
 });
 
 export default NewComment;

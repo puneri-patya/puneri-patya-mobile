@@ -10,7 +10,6 @@ import Colors from '../../constants/Colors';
 import * as postsActions from '../../store/actions/posts';
 import * as usersActions from '../../store/actions/users';
 import * as chatActions from '../../store/actions/chat';
-import LinearGradient from 'react-native-linear-gradient';
 
 
 const AllPostsScreen = (props) => {
@@ -114,30 +113,27 @@ const AllPostsScreen = (props) => {
 
     return (
         <View style={styles.container}>
-            {/* <LinearGradient colors={['#ffffff', '#e3e9f2', '#5b94f7', '#bd3a3f']} locations={[0, 0.40, 0.64, 1]} style={styles.container}> */}
-                {/* <View style={styles.screen} > */}
-                <FlatList
-                    ref={refPosts}
-                    style={styles.list}
-                    onRefresh={loadPosts}
-                    refreshing={isRefreshing}
-                    data={posts}
-                    keyExtractor={(item) => item._id}
-                    ItemSeparatorComponent={() => {
-                        return (
-                            <View style={styles.separator} />
-                        )
-                    }}
-                    renderItem={(post) => {
-                        console.log("posts - ", post.index);
-                        return (
-                            <Card post={post.item} userId={loggedUser._id} toggleLikeHandler={toggleLikeHandler} />
-                        )
-                    }}
-                />
 
-                {/* </View> */}
-            {/* </LinearGradient> */}
+            <FlatList
+                ref={refPosts}
+                style={styles.list}
+                onRefresh={loadPosts}
+                refreshing={isRefreshing}
+                data={posts}
+                keyExtractor={(item) => item._id}
+                ItemSeparatorComponent={() => {
+                    return (
+                        <View style={styles.separator} />
+                    )
+                }}
+                renderItem={(post) => {
+                    console.log("posts - ", post.index);
+                    return (
+                        <Card post={post.item} userId={loggedUser._id} toggleLikeHandler={toggleLikeHandler} />
+                    )
+                }}
+            />
+
         </View>
     );
 };

@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Image, Alert, TouchableOpacity } from 'react-native';
 import Colors from '../../constants/Colors';
 import { useNavigation } from '@react-navigation/native';
@@ -8,15 +8,15 @@ import * as ImagePicker from 'expo-image-picker';
 import { showMessage } from "react-native-flash-message";
 
 const ImgPicker = props => {
-    
+
     const [pickedImage, setPickedImage] = useState(props.editImage);
     const navigation = useNavigation();
 
-    
+
 
     useEffect(() => {
         const unsubscribe = navigation.addListener('focus', e => {
-            if(!props.editImage){
+            if (!props.editImage) {
                 setPickedImage()
             }
         });
@@ -29,7 +29,7 @@ const ImgPicker = props => {
     const takeImageHandler = async (type) => {
         let image;
         try {
-            if(type === 'gallery'){
+            if (type === 'gallery') {
                 image = await ImagePicker.launchImageLibraryAsync({
                     allowsEditing: true,
                     base64: true,
@@ -47,36 +47,36 @@ const ImgPicker = props => {
                     mediaTypes: 'Images'
                 });
             }
-            if(!image.cancelled){
+            if (!image.cancelled) {
                 setPickedImage(image.assets[0]);
                 console.log(image.assets[0].fileName);
                 // let res = image.uri.split('.');
                 // let imageExtenstion = res[res.length - 1];
                 // let imageType = `${image.type}/${imageExtenstion}`;
-                
+
                 props.onImageTaken(image.assets[0].base64, image.assets[0].mimeType, image.assets[0].fileSize);
 
             }
         } catch (error) {
-            console.log("Image Error -",error)
+            console.log("Image Error -", error)
         }
     };
 
-    return(
+    return (
         <View style={styles.imagePicker} >
-            <View style={pickedImage?styles.imagePreview:styles.noImagePreview} >
-                { !pickedImage ? (
+            <View style={pickedImage ? styles.imagePreview : styles.noImagePreview} >
+                {!pickedImage ? (
                     <Text style={styles.noPreviewText}>No Pati Chosen</Text>
                 ) : (
                     <Image
                         style={styles.image}
                         source={{ uri: props.previousUpdate ? `${pickedImage.uri}?${new Date(props.previousUpdate)}` : `${pickedImage.uri}` }}
                     />
-                ) }
+                )}
             </View>
 
             <View style={{ flexDirection: 'row' }} >
-                <TouchableOpacity 
+                <TouchableOpacity
                     style={[styles.buttonContainer, styles.loginButton, styles.endMargin]}
                     onPress={takeImageHandler.bind(this, 'gallery')}
                 >
@@ -84,7 +84,7 @@ const ImgPicker = props => {
                         Choose Pati Image
                     </Text>
                 </TouchableOpacity>
-                <TouchableOpacity 
+                <TouchableOpacity
                     style={[styles.buttonContainer, styles.loginButton, styles.startMargin]}
                     onPress={takeImageHandler.bind(this, 'camera')}
                 >
@@ -101,11 +101,11 @@ const ImgPicker = props => {
 const styles = StyleSheet.create({
     imagePicker: {
         alignItems: 'start',
-        marginBottom: 15,
+        marginBottom: 10,
     },
     noImagePreview: {
         width: '100%',
-        height: 64,
+        height: 48,
         borderWidth: 1,
         borderRadius: 10,
         borderColor: "#d2d2d2",
@@ -116,10 +116,11 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
     },
     noPreviewText: {
-        fontSize: 18, 
+        fontSize: 18,
         width: '100%',
         textAlign: 'center',
-        color: Colors.primary
+        color: Colors.primary,
+        fontFamily: 'MuseoModerno-Light',
     },
     imagePreview: {
         width: "100%",
@@ -164,7 +165,9 @@ const styles = StyleSheet.create({
     },
     loginText: {
         color: Colors.primary,
-        fontWeight: 'bold'
+        fontWeight: 'bold',
+        fontSize: 14,
+        fontFamily: 'MuseoModerno-SemiBold',
     },
     endMargin: {
         marginEnd: '1%',

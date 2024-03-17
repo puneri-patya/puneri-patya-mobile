@@ -15,7 +15,7 @@ export const fetchPosts = () => {
         const response = await fetch(`${ENV.apiUrl}/rn/allposts`);
 
         const resData = await response.json();
-        if(resData.error){
+        if (resData.error) {
             throw new Error(resData.error);
         }
 
@@ -29,13 +29,13 @@ export const fetchPosts = () => {
 
 
 
-export const createPost = (title, body, base64Data, imageType) => {
+export const createPost = (title, description, base64Data, imageType, location) => {
     return async (dispatch, getState) => {
 
         const token = getState().auth.token;
         const userId = getState().auth.user._id;
-        const postData = {title, body, base64Data, imageType}
-         console.log(postData.title, postData.body, postData.imageType, `${ENV.apiUrl}/rn/post/new/${userId}`, `Bearer ${token}`)
+        const postData = { title, body: description, base64Data, imageType, latitude: location.latitude, longitude: location.longitude }
+        console.log(postData.title, postData.body, postData.imageType, postData.latitude, postData.longitude, `${ENV.apiUrl}/rn/post/new/${userId}`, `Bearer ${token}`)
         // any async code
         const response = await fetch(`${ENV.apiUrl}/rn/post/new/${userId}`, {
             method: 'POST',
@@ -48,7 +48,7 @@ export const createPost = (title, body, base64Data, imageType) => {
         console.log("Got response")
         const resData = await response.json();
         console.log(resData)
-        if(resData.error){
+        if (resData.error) {
             throw new Error(resData.error);
         }
 
@@ -58,6 +58,7 @@ export const createPost = (title, body, base64Data, imageType) => {
                 _id: resData._id,
                 title: resData.title,
                 body: resData.body,
+                location: resData.location,
                 comments: resData.comments,
                 created: new Date(resData.created),
                 likes: resData.likes,
@@ -84,7 +85,7 @@ export const deletePost = (postId) => {
         })
 
         const resData = await response.json();
-        if(resData.error){
+        if (resData.error) {
             throw new Error(resData.error);
         }
         dispatch({
@@ -95,15 +96,15 @@ export const deletePost = (postId) => {
 };
 
 
-export const updatePost = (postId,title, body, base64Data, imageType) => {
+export const updatePost = (postId, title, body, base64Data, imageType) => {
     return async (dispatch, getState) => {
         const token = getState().auth.token;
         let postData;
         // const userId = getState().auth.user._id;
-        if( !base64Data || !imageType || (base64Data === '' && imageType === '')){
-            postData = {title, body}
+        if (!base64Data || !imageType || (base64Data === '' && imageType === '')) {
+            postData = { title, body }
         } else {
-            postData = {title, body, base64Data, imageType}
+            postData = { title, body, base64Data, imageType }
         }
         const response = await fetch(`${ENV.apiUrl}/rn/post/${postId}`, {
             method: "PUT",
@@ -114,7 +115,7 @@ export const updatePost = (postId,title, body, base64Data, imageType) => {
             body: JSON.stringify(postData)
         });
         const resData = await response.json();
-        if(resData.error){
+        if (resData.error) {
             throw new Error(resData.error);
         }
         dispatch({
@@ -143,13 +144,13 @@ export const likePost = (postId) => {
         const userId = getState().auth.user._id;
         const posts = getState().posts.allPosts;
         const index = posts.findIndex(p => p._id === postId)
-        if(posts[index].likes.indexOf(userId) === -1){
+        if (posts[index].likes.indexOf(userId) === -1) {
             dispatch({
                 type: LIKE_POST,
                 userId: userId,
                 postId: postId
             });
-            
+
             const response = await fetch(`${ENV.apiUrl}/post/like`, {
                 method: "PUT",
                 headers: {
@@ -159,7 +160,7 @@ export const likePost = (postId) => {
                 body: JSON.stringify({ userId, postId })
             });
             const resData = await response.json();
-            if(resData.error){
+            if (resData.error) {
                 throw new Error(resData.error);
             }
         }
@@ -171,7 +172,7 @@ export const unlikePost = (postId) => {
     return async (dispatch, getState) => {
         const token = getState().auth.token;
         const userId = getState().auth.user._id;
-        
+
         dispatch({
             type: UNLIKE_POST,
             userId: userId,
@@ -186,7 +187,7 @@ export const unlikePost = (postId) => {
             body: JSON.stringify({ userId, postId })
         });
         const resData = await response.json();
-        if(resData.error){
+        if (resData.error) {
             throw new Error(resData.error);
         }
     }
@@ -199,8 +200,8 @@ export const commentPost = (postId, text) => {
         const token = getState().auth.token;
         const userId = getState().auth.user._id;
         const userName = getState().auth.user.name;
-        
-        const comment = {text};
+
+        const comment = { text };
 
         // dispatch({
         //     type: ADD_COMMENT_TEMP,
@@ -224,7 +225,7 @@ export const commentPost = (postId, text) => {
             body: JSON.stringify({ userId, postId, comment })
         });
         const resData = await response.json();
-        if(resData.error){
+        if (resData.error) {
             throw new Error(resData.error);
         }
         dispatch({
@@ -240,7 +241,7 @@ export const uncommentPost = (postId, comment) => {
     return async (dispatch, getState) => {
         const token = getState().auth.token;
         const userId = getState().auth.user._id;
-        
+
         dispatch({
             type: UNCOMMENT_POST,
             postId: postId,
@@ -256,7 +257,7 @@ export const uncommentPost = (postId, comment) => {
             body: JSON.stringify({ userId, postId, comment })
         });
         const resData = await response.json();
-        if(resData.error){
+        if (resData.error) {
             throw new Error(resData.error);
         }
     }

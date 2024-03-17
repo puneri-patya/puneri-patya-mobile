@@ -23,6 +23,10 @@ import AuthScreen from '../screens/auth/AuthScreen';
 import ForgotPasswordScreen, { screenOptions as forgotPasswordScreenOptions } from '../screens/auth/ForgotPasswordScreen';
 import { Text } from 'react-native';
 import { getHeaderTitle } from '@react-navigation/elements';
+import Styles from '../constants/Styles';
+import { PageTitle } from '../components/UI/PageTitle';
+import { BlurView } from 'expo-blur';
+import { TabBarButton } from '../components/UI/TabBarButton';
 
 
 
@@ -38,8 +42,7 @@ const defaultNavOptions = {
     // },
     headerTintColor: Platform.OS === 'android' ? 'white' : Colors.brightBlue,
     headerTransparent: true,
-    
-    headerLeft: () => (<Text>Left</Text>),
+    headerShown: false,
     headerBackTitle: 'Back',
 };
 
@@ -49,7 +52,7 @@ const getTabBarVisibility = (route) => {
         ? route.state.routes[route.state.index].name
         : '';
 
-    if (routeName === 'Chat' ) {
+    if (routeName === 'Chat') {
         return false;
     }
 
@@ -204,27 +207,16 @@ const BottomTabNavigator = createBottomTabNavigator();
 export const BottomNavigator = () => {
     return (
         <BottomTabNavigator.Navigator
-            // tabBarOptions={{
-            //     activeTintColor: Colors.brightBlue
-            // }}
-            // options={{
-            //     tabBarActiveTintColor: Colors.brightBlue,
-            //     tabBarInactiveTintColor: 'gray',
-            //     tabBarStyle: { backgroundColor: 'white' },
-            //     tabBarLabelStyle: { fontSize: 12 },
-            //     tabBarIconStyle: { width: 20, height: 20 },
-            //     tabBarShowLabel: true,
-            //     tabBarHideOnKeyboard: true,
-            //     tabBarStyle: { position: 'absolute', bottom: 0, left: 0, right: 0, backgroundColor: 'white' },
-            //     header: ({ navigation, route, options }) => {
-            //         const title = getHeaderTitle(options, route.name);
-                  
-            //         return <MyHeader title={title} style={options.headerStyle} />;
-            //       },
-            //       headerShown: true,
-            // }}
+            screenOptions={{
+                tabBarButton: (props) => <TabBarButton {...props} />,
+                tabBarActiveTintColor: "#fff",
+                tabBarInactiveTintColor: "#000",
+                tabBarLabelStyle: { fontFamily: "MuseoModerno-Light" },
+                tabBarIconStyle: { marginTop: 8 },
+                tabBarStyle: { paddingTop: 4 },
+            }}
         >
-            
+
 
             <BottomTabNavigator.Screen
                 name="Puneri Patya.com"
@@ -233,23 +225,21 @@ export const BottomNavigator = () => {
                     tabBarVisible: getTabBarVisibility(route),
                     tabBarLabel: 'Home',
                     headerShown: true,
-                    headerTitle: 'Home',
-                    headerLeft: () => (
-                        <Image source={require('../assets/logo.png')} style={{ marginStart: -100, resizeMode: 'contain', height: '100%', alignSelf: 'flex-start', alignItems: 'stretch', alignContent: 'flex-start' }} />
-                    ),
-                    // headerRight: () => (
-                    //     <Text>Puneri Patya.com</Text>
-                    // ),
+                    headerTitleAlign: 'left',
+                    headerShadowVisible: false,
+                    // headerTitleStyle: { ...Styles.pageTitle },
+                    headerTitle: (props) => (<PageTitle title={'Puneri Patya.com'} />),
                     tabBarIcon: (props) => (
                         <Ionicons
                             name={'home'}
-                            size={24}
+                            size={20}
                             color={props.color}
                         />
-                    )
+                    ),
+                    tabBarIconStyle: { marginTop: 8 },
                 })}
             />
-            <BottomTabNavigator.Screen
+            {/* <BottomTabNavigator.Screen
                 name="FindPeople"
                 component={FindPeopleNavigator}
                 options={{
@@ -262,25 +252,24 @@ export const BottomNavigator = () => {
                         />
                     )
                 }}
-            />
+            /> */}
 
             <BottomTabNavigator.Screen
                 name="AddPost"
                 component={CreatePostNavigator}
                 options={{
-                    tabBarLabel: 'Add Post',
+                    tabBarLabel: 'New Pati',
                     tabBarIcon: (props) => (
                         <Ionicons
                             name={'add-circle-outline'}
-                            size={24}
+                            size={20}
                             color={props.color}
                         />
                     ),
                     headerShown: true,
+                    headerTitleAlign: 'left',
+                    headerTitleStyle: { ...Styles.pageTitle },
                     headerTitle: 'New Pati',
-                    headerLeft: () => (
-                        <Image source={require('../assets/logo.png')} style={{ marginStart: -100, resizeMode: 'contain', height: '100%', alignSelf: 'flex-start', alignItems: 'stretch', alignContent: 'flex-start' }} />
-                    ),
                 }}
             />
 
@@ -292,14 +281,14 @@ export const BottomNavigator = () => {
                     tabBarIcon: (props) => (
                         <Ionicons
                             name={'person'}
-                            size={24}
+                            size={20}
                             color={props.color}
                         />
                     )
                 }}
             />
 
-        </BottomTabNavigator.Navigator>
+        </BottomTabNavigator.Navigator >
     );
 };
 
