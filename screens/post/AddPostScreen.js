@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
     View,
     Text,
@@ -7,9 +7,10 @@ import {
     TouchableOpacity,
     ActivityIndicator,
     KeyboardAvoidingView,
-    ScrollView
+    ScrollView,
+    Platform
 } from 'react-native';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 
 import * as postActions from '../../store/actions/posts';
 import ImgPicker from '../../components/app/ImgPicker';
@@ -17,24 +18,38 @@ import Colors from '../../constants/Colors';
 import { showMessage } from "react-native-flash-message";
 import MapView, { Marker } from 'react-native-maps';
 import * as Location from 'expo-location';
+import ENV from '../../env';
+import { InputWithLabel } from '../../components/UI/form/InputWithLabel';
 
 
 const AddPostScreen = (props) => {
 
     const [clearPickedImage, setClearPickedImage] = useState(false);
-    const [title, setTitle] = useState('');
-    const [body, setBody] = useState('');
-    const [base64Data, setBase64Data] = useState('');
+
+    const titleState = useState('');
+    const [title, setTitle] = titleState;
+    const bodyState = useState('');
+    const [body, setBody] = bodyState;
     const [imageType, setImageType] = useState('');
     const [imageSize, setImageSize] = useState(0);
     const [isTitleFocused, setIsTitleFocused] = useState(false);
     const [isDescFocused, setIsDescFocused] = useState(false);
     const [locationAddress, setLocationAddress] = useState('');
+    const mapMarker = useRef(null);
 
     const [isLoading, setIsLoading] = useState(false);
-    const [location, setLocation] = useState({ latitude: 0, longitude: 0 });
+    const [location, setLocation] = useState({ mapRegion: { latitude: 0, longitude: 0, latitudeDelta: 0.002, longitudeDelta: 0.0002 }, markerCoordinate: { latitude: 0, longitude: 0 } });
+
+    const postId = props.route.params?.postId;
+
+    const [editImage, setEditImage] = useState({
+        uri: `${ENV.apiUrl}/post/photo/${postId}`
+    });
+    const [previousUpdate, setPreviousUpdate] = useState('');
 
     const dispatch = useDispatch();
+
+    const [base64Data, setBase64Data] = useState('');
 
 
     const clearForm = () => {
@@ -61,35 +76,42 @@ const AddPostScreen = (props) => {
                 return;
             }
 
-            let location = await Location.getCurrentPositionAsync({});
-            setLocationDetails(location.coords);
-            //setLocation({ latitude: location.coords.latitude, longitude: location.coords.longitude });
-            //console.log(location);
-            //const locationDetails = await Location.reverseGeocodeAsync({ latitude: location.coords.latitude, longitude: location.coords.longitude });
-            //const address = locationDetails[0].name + ", " + locationDetails[0].city + ", " + locationDetails[0].region + ", " + locationDetails[0].country;
-            //setLocationAddress(address);
-            // AIzaSyAQoy_pJjp4kakZ3x2isDGQRZAYiUMO8b4
-            // showMessage({
-            //     message: "Location enabled.",
-            //     type: "success",
-            //     duration: 3000,
-            //     icon: { icon: "success", position: 'left' }
-            // });
+            if (selectedPost) {
+                setTitle(selectedPost.title);
+                setBody(selectedPost.body);
+                setPreviousUpdate(selectedPost.updated);
+                setLocationDetails({ latitude: selectedPost.latitude, longitude: selectedPost.longitude })
+                const photo = await dispatch(postActions.getPostPhoto(postId));
+                setBase64Data(photo);
+            } else {
+                let location = await Location.getCurrentPositionAsync({});
+                setLocationDetails(location.coords);
+            }
         }
 
-        // Call the function to get the location
-        getLocation();
-    }, []);
 
-    useEffect(() => {
-        const unsubscribe = props.navigation.addListener('focus', clearForm);
-        return () => {
-            unsubscribe();
-        };
-    }, [clearForm])
+        getLocation();
+    }, [selectedPost]);
+
+    const selectedPost = useSelector(state =>
+        state.posts.allPosts.find(post => post._id === postId)
+    );
 
     const setLocationDetails = async (location) => {
-        setLocation({ latitude: location.latitude, longitude: location.longitude });
+        console.log(("$$$$", location))
+        loc = {
+            mapRegion: {
+                latitude: location.latitude,
+                longitude: location.longitude,
+                latitudeDelta: 0.002,
+                longitudeDelta: 0.0002,
+            },
+            markerCoordinate: {
+                latitude: location.latitude,
+                longitude: location.longitude,
+            }
+        }
+        setLocation(loc);
         const locationDetails = await Location.reverseGeocodeAsync({ latitude: location.latitude, longitude: location.longitude });
         const address = locationDetails[0].name + ", " + locationDetails[0].city + ", " + locationDetails[0].region + ", " + locationDetails[0].country;
         setLocationAddress(address);
@@ -132,11 +154,37 @@ const AddPostScreen = (props) => {
         if (validatePost()) {
             console.log("VALID POST")
             try {
-                await dispatch(postActions.createPost(title, body, base64Data, imageType, location));
+                await dispatch(postActions.createPost(title, body, base64Data, imageType, location.markerCoordinate));
                 clearForm();
                 props.navigation.navigate('AllPosts')
                 showMessage({
                     message: "Your post was successfully created.",
+                    type: "success",
+                    duration: 3000,
+                    icon: { icon: "success", position: 'left' }
+                });
+            } catch (error) {
+                showMessage({
+                    message: error.message,
+                    type: "danger",
+                    duration: 3000,
+                    icon: { icon: "danger", position: 'left' }
+                });
+                console.log("ERROR ", error.message);
+            }
+        }
+        setIsLoading(false);
+    }
+
+    const updatePost = async () => {
+        setIsLoading(true);
+        if (validatePost()) {
+            try {
+                await dispatch(postActions.updatePost(postId, title, body, base64Data, imageType, location.markerCoordinate));
+                clearForm();
+                props.navigation.goBack();
+                showMessage({
+                    message: "Your post was successfully edited.",
                     type: "success",
                     duration: 3000,
                     icon: { icon: "success", position: 'left' }
@@ -162,40 +210,40 @@ const AddPostScreen = (props) => {
 
     return (
         <ScrollView style={{ backgroundColor: Colors.cardBackground }} >
-            <KeyboardAvoidingView style={styles.screen} behavior="padding" >
+            <KeyboardAvoidingView style={styles.screen} behavior={Platform.OS === 'ios' ? 'padding' : 'height'} >
                 <View style={styles.container}>
-                    <View style={styles.labelContainer} >
-                        <Text style={styles.labelText} >Title</Text>
-                    </View>
-                    <View style={isTitleFocused ? styles.inputContainerActive : styles.inputContainer}>
-                        <TextInput style={styles.inputs}
-                            placeholder="Short summary of pati"
-                            underlineColorAndroid='transparent'
-                            value={title}
-                            onFocus={() => setIsTitleFocused(true)}
-                            onBlur={() => setIsTitleFocused(false)}
-                            onChangeText={(text) => setTitle(text)}
-                        />
-                    </View>
-                    <ImgPicker
-                        onImageTaken={imagePickedHandler}
-                        clearPickedImage={clearPickedImage}
-                    />
+                    <InputWithLabel label="Title" placeholder="Short summary of pati" inputState={titleState} onChangeText={(text) => setTitle(text)} />
+
+                    {!selectedPost ?
+                        <ImgPicker
+                            onImageTaken={imagePickedHandler}
+                            clearPickedImage={clearPickedImage}
+
+                        /> :
+                        <ImgPicker
+                            onImageTaken={imagePickedHandler}
+                            editImage={editImage}
+                            previousUpdate={previousUpdate}
+
+                        />}
                     <View style={styles.labelContainer} >
                         <Text style={styles.labelText} >Where is this pati located?</Text>
                     </View>
                     <View style={styles.noImagePreview} >
                         <MapView
                             style={styles.map}
-                            followsUserLocation={true}
-                            region={location}
+                            zoomEnabled={true}
+                            region={location.mapRegion}
                         >
                             <Marker
                                 draggable
-                                coordinate={location}
+                                isPreselected
+                                coordinate={location.markerCoordinate}
                                 title={title || 'New Pati'}
                                 description={'Location of Pati'}
                                 onDragEnd={(e) => setLocationDetails(e.nativeEvent.coordinate)}
+                                ref={mapMarker}
+                                key={'MyMarker'}
                             />
                         </MapView>
                     </View>
@@ -211,30 +259,23 @@ const AddPostScreen = (props) => {
                         />
                     </View>
 
-                    <View style={styles.labelContainer} >
-                        <Text style={styles.labelText} >Description</Text>
-                    </View>
-                    <View style={isDescFocused ? styles.inputContainerActive : styles.inputContainer}>
-                        <TextInput style={styles.descriptionInput}
-                            placeholder="Why do you think this is a good Puneri Pati?"
-                            underlineColorAndroid='transparent'
-                            multiline
-                            numberOfLines={4}
-                            value={body}
-                            onFocus={() => setIsDescFocused(true)}
-                            onBlur={() => setIsDescFocused(false)}
-                            onChangeText={(text) => setBody(text)}
-                        />
-                    </View>
+                    <InputWithLabel
+                        label="Description"
+                        placeholder="Why do you think this is a good Puneri Pati?"
+                        inputState={bodyState}
+                        multiline
+                        numberOfLines={4}
+                        onChangeText={(text) => setBody(text)} />
+
                     <TouchableOpacity
                         style={[styles.buttonContainer, styles.loginButton]}
-                        onPress={createPost}
+                        onPress={selectedPost ? updatePost : createPost}
                     >
                         {isLoading ? (
                             <ActivityIndicator size="small" color="#fff" />
                         ) : (
                             <Text style={styles.loginText}>
-                                Submit Pati
+                                {`${selectedPost ? 'Update' : 'Submit'} Pati`}
                             </Text>
                         )}
 
@@ -246,10 +287,11 @@ const AddPostScreen = (props) => {
 };
 
 
-export const screenOptions = {
-    headerTitle: 'Create Post',
-    headerShown: false,
-}
+export const screenOptions = ({ route }) => ({
+    title: `Update Pati - ${route.params?.title}`,
+    // headerTitle: `Update Pati - ${route.params?.title}`,
+    headerShown: route.params?.postId ? true : false,
+})
 
 const styles = StyleSheet.create({
     screen: {

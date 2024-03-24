@@ -9,7 +9,7 @@ import {
 } from 'react-native-popup-menu';
 const { SlideInMenu } = renderers;
 
-import { MaterialCommunityIcons } from '@expo/vector-icons'; 
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import Colors from '../../constants/Colors';
 import { useNavigation } from '@react-navigation/native';
 
@@ -22,22 +22,22 @@ const MenuItem = () => {
     const dispatch = useDispatch();
     const navigation = useNavigation();
 
-    return(
+    return (
         <Menu renderer={SlideInMenu} >
             <MenuTrigger>
-                <MaterialCommunityIcons 
-                    name="dots-vertical" 
-                    size={24} 
-                    color={Platform.OS === 'android' ? '#fff' : Colors.brightBlue}
-                    style={{  padding: 15, marginRight: 5 }}
+                <MaterialCommunityIcons
+                    name="dots-vertical"
+                    size={24}
+                    color={Platform.OS === 'android' ? '#fff' : Colors.primary}
+                    style={{ padding: 15, marginRight: 5 }}
                 />
             </MenuTrigger>
             <MenuOptions >
-                <View style={{ borderTopLeftRadius: 30, borderTopRightRadius: 30, backgroundColor: Colors.brightBlue, overflow: 'hidden' }} >
+                <View style={{ paddingBottom: 40, borderTopLeftRadius: 10, borderTopRightRadius: 10, backgroundColor: Colors.primary, overflow: 'hidden' }} >
                     <MenuOption onSelect={() => navigation.navigate('YourProfile', { screen: 'EditProfile' })}>
                         <View style={{ flexDirection: 'row', borderBottomColor: '#fff', borderBottomWidth: 1 }} >
-                            <MaterialCommunityIcons name="account-edit" size={24} color="#fff" style={{ alignSelf: 'center', marginLeft: 10 }} />                                
-                            <Text style={{ padding: 15, fontSize: 16,  color: '#fff' }}>Edit Profile</Text>
+                            <MaterialCommunityIcons name="account-edit" size={24} color="#fff" style={{ alignSelf: 'center', marginLeft: 10 }} />
+                            <Text style={{ padding: 15, fontSize: 16, color: '#fff', fontFamily: "MuseoModerno-Bold", }}>Edit Profile</Text>
                         </View>
                     </MenuOption>
                     {/* <MenuOption onSelect={() => alert(`Save`)}>
@@ -46,7 +46,7 @@ const MenuItem = () => {
                             <Text style={{ padding: 15, fontSize: 16,  color: '#fff' }}>Delete Profile</Text>
                         </View>
                     </MenuOption> */}
-                    <MenuOption 
+                    <MenuOption
                         onSelect={async () => {
                             await dispatch(authActions.logout())
                             showMessage({
@@ -55,11 +55,11 @@ const MenuItem = () => {
                                 duration: 3000,
                                 icon: { icon: "success", position: 'left' }
                             });
-                        }} 
+                        }}
                     >
                         <View style={{ flexDirection: 'row' }} >
                             <MaterialCommunityIcons name="logout" size={24} color="#fff" style={{ alignSelf: 'center', marginLeft: 10 }} />
-                            <Text style={{ padding: 15, fontSize: 16, color: '#fff' }}>Logout</Text>
+                            <Text style={{ padding: 15, fontSize: 16, color: '#fff', fontFamily: "MuseoModerno-Bold", }}>Logout</Text>
                         </View>
                     </MenuOption>
                 </View>

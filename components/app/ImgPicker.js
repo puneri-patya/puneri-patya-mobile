@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Image, Alert, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, Image, Alert, TouchableOpacity, Linking } from 'react-native';
 import Colors from '../../constants/Colors';
 import { useNavigation } from '@react-navigation/native';
 
@@ -26,6 +26,8 @@ const ImgPicker = props => {
         };
     }, [])
 
+    const [cameraStatus, requestCameraPermission] = ImagePicker.useCameraPermissions()
+
     const takeImageHandler = async (type) => {
         let image;
         try {
@@ -35,17 +37,39 @@ const ImgPicker = props => {
                     base64: true,
                     // aspect: [16, 9],
                     quality: 1,
+
                     allowsMultipleSelection: false,
                     mediaTypes: 'Images',
                 });
             } else {
-                image = await ImagePicker.launchCameraAsync({
-                    allowsEditing: true,
-                    base64: true,
-                    // aspect: [16, 9],
-                    quality: 1,
-                    mediaTypes: 'Images'
-                });
+                if (cameraStatus) {
+                    if (
+                        cameraStatus.status === ImagePicker.PermissionStatus.UNDETERMINED ||
+                        (cameraStatus.status === ImagePicker.PermissionStatus.DENIED && cameraStatus.canAskAgain)
+                    ) {
+                        const permission = await requestCameraPermission()
+                        if (permission.granted) {
+                            image = await ImagePicker.launchCameraAsync({
+                                allowsEditing: true,
+                                base64: true,
+                                // aspect: [16, 9],
+                                quality: 1,
+                                mediaTypes: 'Images'
+                            });
+                        }
+                    } else if (cameraStatus.status === ImagePicker.PermissionStatus.DENIED) {
+                        await Linking.openSettings()
+                    } else {
+                        image = await ImagePicker.launchCameraAsync({
+                            allowsEditing: true,
+                            base64: true,
+                            // aspect: [16, 9],
+                            quality: 1,
+                            mediaTypes: 'Images'
+                        });
+                    }
+                }
+
             }
             if (!image.cancelled) {
                 setPickedImage(image.assets[0]);
@@ -81,7 +105,7 @@ const ImgPicker = props => {
                     onPress={takeImageHandler.bind(this, 'gallery')}
                 >
                     <Text style={styles.loginText}>
-                        Choose Pati Image
+                        Open Gallery
                     </Text>
                 </TouchableOpacity>
                 <TouchableOpacity

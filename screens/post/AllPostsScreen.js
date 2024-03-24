@@ -87,8 +87,8 @@ const AllPostsScreen = (props) => {
     if (error) {
         return (
             <View style={styles.centered} >
-                <Text>An error occured.</Text>
-                <Button title="Try again" onPress={loadPosts} color={Colors.primary} />
+                <Text style={styles.text}>{error}</Text>
+                <Button title="Try again" onPress={loadPosts} color={Colors.primary} style={styles.text} />
             </View>
         );
     }
@@ -176,7 +176,13 @@ const styles = StyleSheet.create({
     centered: {
         flex: 1,
         justifyContent: 'center',
-        alignItems: 'center'
+        alignItems: 'center',
+        fontFamily: "MuseoModerno-SemiBold",
+        fontSize: 14,
+    },
+    text: {
+        fontFamily: "MuseoModerno-Regular",
+        fontSize: 18,
     },
     list: {
         width: '100%',

@@ -47,7 +47,7 @@ const Card = (props) => {
     const deleteHandler = (id) => {
         Alert.alert(
             'Are you sure?',
-            'Do you really want to delete this post?',
+            'Do you really want to delete this pati?',
             [
                 { text: 'No', style: 'default' },
                 {
@@ -56,7 +56,7 @@ const Card = (props) => {
                     onPress: async () => {
                         await dispatch(postActions.deletePost(id))
                         showMessage({
-                            message: "Your post was successfully deleted.",
+                            message: "Your pati was successfully deleted.",
                             type: "success",
                             icon: { icon: "success", position: 'left' },
                             duration: 3000
@@ -227,7 +227,7 @@ const Card = (props) => {
                         <View style={styles.socialBarSection}>
                             <TouchableOpacity
                                 style={styles.socialBarButton}
-                                onPress={() => navigation.navigate('Comments', { postId: post._id, userId: userId })}
+                                onPress={() => navigation.navigate('Comments', { postId: post._id, userId: userId, title: post.title })}
                             >
                                 <Ionicons
                                     name="chatbox-outline"
@@ -267,7 +267,7 @@ const Card = (props) => {
 
                 {post.comments.length > 2 && (
                     <TouchableOpacity
-                        onPress={() => navigation.navigate('Comments', { postId: post._id, userId: userId })}
+                        onPress={() => navigation.navigate('Comments', { postId: post._id, userId: userId, title: post.title })}
                     >
                         <Text style={styles.commentBar}>{`View all ${post.comments.length} comments`}</Text>
                     </TouchableOpacity>
@@ -278,7 +278,7 @@ const Card = (props) => {
                         <View style={styles.socialBarSection}>
                             <TouchableOpacity
                                 style={styles.socialBarButton}
-                                onPress={() => navigation.navigate('EditPost', { postId: post._id })}
+                                onPress={() => navigation.navigate('EditPost', { postId: post._id, title: post.title })}
                             >
                                 <MaterialCommunityIcons
                                     name="square-edit-outline"

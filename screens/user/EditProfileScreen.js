@@ -8,13 +8,14 @@ import Colors from '../../constants/Colors';
 
 import ENV from '../../env';
 import { showMessage } from "react-native-flash-message";
+import Styles from '../../constants/Styles';
 
 const EditProfileScreen = (props) => {
 
     const loggedUser = useSelector(state => state.auth.user);
     const users = useSelector(state => state.users.allUsers);
     const userDetails = users.filter(u => u._id === loggedUser._id)[0];
-    
+
     const [name, setName] = useState(userDetails.name);
     const [email, setEmail] = useState(userDetails.email);
     const [about, setAbout] = useState(userDetails.about);
@@ -38,51 +39,43 @@ const EditProfileScreen = (props) => {
         setPassword('');
         setIsLoading(false);
     }
-    
+
     const validatePost = () => {
         const emailRegex = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
         const passwordRegex = /\d/
 
-        let strLength = base64Data.length;
-        let sizeInBytes = 4 * Math.ceil((strLength / 3))*0.5624896334383812;
-        let sizeInKb = sizeInBytes/1000;
-        console.log(sizeInKb);
-        if(sizeInKb > 100){
+        // let strLength = base64Data.length;
+        // let sizeInBytes = 4 * Math.ceil((strLength / 3)) * 0.5624896334383812;
+        // let sizeInKb = sizeInBytes / 1000;
+        // console.log(sizeInKb);
+        // if (sizeInKb > 100) {
+        //     showMessage({
+        //         message: "Image size should be less than 150KB.",
+        //         type: "danger",
+        //         icon: { icon: "danger", position: 'left' }
+        //     });
+        //     return false;
+        // }
+
+        if (!name || name.length < 3) {
             showMessage({
-                message: "Image size should be less than 150KB.",
+                message: "Name is too short. Please enter atleast 3 characters.",
                 type: "danger",
                 icon: { icon: "danger", position: 'left' }
             });
             return false;
         }
 
-        if( !name){
+        if (!about || about.length === 0) {
             showMessage({
-                message: "Please enter a valid name.",
-                type: "danger",
-                icon: { icon: "danger", position: 'left' }
-            });
-            return false;
-        }
-        if( name && name.length < 2){
-            showMessage({
-                message: "Please enter a valid name.",
+                message: "Please write something about yourself.",
                 type: "danger",
                 icon: { icon: "danger", position: 'left' }
             });
             return false;
         }
 
-        if(!about || about.length === 0){
-            showMessage({
-                message: "Please enter something in About field.",
-                type: "danger",
-                icon: { icon: "danger", position: 'left' }
-            });
-            return false;
-        }
-
-        if(!emailRegex.test(email.toLowerCase())){
+        if (!emailRegex.test(email.toLowerCase())) {
             showMessage({
                 message: "Please enter a valid email.",
                 type: "danger",
@@ -90,8 +83,8 @@ const EditProfileScreen = (props) => {
             });
             return false;
         }
-        
-        if(password.length > 0 && password.length < 6){
+
+        if (password.length > 0 && password.length < 6) {
             showMessage({
                 message: "Password should be atleast 6 characters long.",
                 type: "danger",
@@ -100,12 +93,12 @@ const EditProfileScreen = (props) => {
             return false;
 
         }
-        if(password.length > 0 && !passwordRegex.test(password)){
+        if (password.length > 0 && !passwordRegex.test(password)) {
             showMessage({
                 message: "Password should contain atleast 1 number.",
                 type: "danger",
                 icon: { icon: "danger", position: 'left' }
-            });     
+            });
             return false;
         }
         return true;
@@ -113,7 +106,7 @@ const EditProfileScreen = (props) => {
 
     const updatePost = async () => {
         setIsLoading(true);
-        if(validatePost()){
+        if (validatePost()) {
             try {
                 await dispatch(usersActions.updateProfile(name, email, about, password, base64Data, imageType));
                 clearForm();
@@ -130,9 +123,9 @@ const EditProfileScreen = (props) => {
                     type: "danger",
                     icon: { icon: "danger", position: 'left' }
                 });
-                console.log("ERROR ",error.message);
+                console.log("ERROR ", error.message);
             }
-        } 
+        }
         setIsLoading(false);
     }
 
@@ -141,7 +134,7 @@ const EditProfileScreen = (props) => {
         setImageType(imageType);
     }
 
-    return(
+    return (
         <ScrollView>
             <KeyboardAvoidingView style={styles.screen} >
                 <View style={styles.container}>
@@ -151,82 +144,83 @@ const EditProfileScreen = (props) => {
                             <Text style={styles.msgText}> {error} </Text>
                         </View>
                     )} */}
-                    <View style={styles.labelContainer} >
-                        <Text style={styles.labelText} >Profile Photo</Text>
+                    <View style={Styles.labelContainer} >
+                        <Text style={Styles.labelText} >Profile Photo</Text>
                     </View>
 
-                    <ImgPicker 
-                        onImageTaken={imagePickedHandler} 
+                    <ImgPicker
+                        onImageTaken={imagePickedHandler}
                         editImage={editImage}
                         previousUpdate={previousUpdate}
                     />
-                    
-                    <View style={styles.labelContainer} >
-                        <Text style={styles.labelText} >Name</Text>
+
+                    <View style={Styles.labelContainer} >
+                        <Text style={Styles.labelText} >Name</Text>
                     </View>
-                    <View style={styles.inputContainer}>
-                        <TextInput style={styles.inputs}
+                    <View style={Styles.inputContainer}>
+                        <TextInput style={Styles.inputs}
                             placeholder="Name"
                             underlineColorAndroid='transparent'
                             value={name}
-                            onChangeText={(text) => setName(text) }
+                            onChangeText={(text) => setName(text)}
                         />
                     </View>
 
-                    <View style={styles.labelContainer} >
-                        <Text style={styles.labelText} >Email</Text>
+                    <View style={Styles.labelContainer} >
+                        <Text style={Styles.labelText} >Email</Text>
                     </View>
-                    <View style={styles.inputContainer}>
-                        <TextInput style={styles.inputs}
+                    <View style={Styles.inputContainer}>
+                        <TextInput style={Styles.inputs}
                             placeholder="Email"
                             underlineColorAndroid='transparent'
                             value={email}
-                            onChangeText={(text) => setEmail(text) }
+                            onChangeText={(text) => setEmail(text)}
                         />
                     </View>
 
-                    <View style={styles.labelContainer} >
-                        <Text style={styles.labelText} >About</Text>
+                    <View style={Styles.labelContainer} >
+                        <Text style={Styles.labelText} >About</Text>
                     </View>
-                    <View style={styles.inputContainer}>
-                        <TextInput style={styles.inputs}
+                    <View style={Styles.inputContainer}>
+                        <TextInput style={Styles.inputs}
                             placeholder="About"
                             underlineColorAndroid='transparent'
                             value={about}
-                            onChangeText={(text) => setAbout(text) }
+                            onChangeText={(text) => setAbout(text)}
                         />
                     </View>
 
-                    <View style={styles.labelContainer} >
-                        <Text style={styles.labelText} >Password</Text>
+                    <View style={Styles.labelContainer} >
+                        <Text style={Styles.labelText} >Password</Text>
                     </View>
-                    <View style={styles.inputContainer}>
-                        <TextInput style={styles.inputs}
+                    <View style={Styles.inputContainer}>
+                        <TextInput style={Styles.inputs}
                             placeholder="Password"
                             secureTextEntry={true}
                             underlineColorAndroid='transparent'
                             value={password}
-                            onChangeText={(text) => setPassword(text) }
+                            onChangeText={(text) => setPassword(text)}
                         />
                     </View>
+                    <View style={Styles.buttonContainer} >
+                        <TouchableOpacity
+                            style={[Styles.buttonContainer, Styles.buttonPrimary]}
+                            onPress={updatePost}
+                        >
 
-                    <TouchableOpacity 
-                        style={[styles.buttonContainer, styles.loginButton]}
-                        onPress={updatePost}
-                    >
+                            {isLoading ? (
+                                <ActivityIndicator size="small" color="#fff" />
+                            ) : (
+                                <Text style={Styles.buttonText}>
+                                    Update
+                                </Text>
+                            )}
 
-                        { isLoading ? (
-                            <ActivityIndicator size="small" color="#fff" />
-                        )  :(
-                            <Text style={styles.loginText}>
-                                Update
-                            </Text>
-                        ) }
-                        
-                    </TouchableOpacity>
+                        </TouchableOpacity>
+                    </View>
 
-                    </View>   
-                
+                </View>
+
             </KeyboardAvoidingView>
 
         </ScrollView>
@@ -234,7 +228,7 @@ const EditProfileScreen = (props) => {
 };
 
 export const screenOptions = {
-    headerTitle: 'Edit Profile'
+    title: "Edit Profile"
 }
 
 const styles = StyleSheet.create({
@@ -242,15 +236,16 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        marginTop: 40
+        //marginTop: 40
     },
     container: {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
+        paddingHorizontal: 10,
     },
 
-    errorMsgContainer:{
+    errorMsgContainer: {
         display: 'flex',
         flexDirection: 'row',
         justifyContent: 'center',
@@ -260,7 +255,7 @@ const styles = StyleSheet.create({
         marginHorizontal: 20,
         borderWidth: 1,
         borderColor: '#D8000C',
-        backgroundColor: "#FFBABA" ,
+        backgroundColor: "#FFBABA",
         color: "#D8000C",
         borderRadius: 25,
     },

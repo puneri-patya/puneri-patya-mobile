@@ -7,7 +7,8 @@
     "android": "expo run:android",
     "ios": "expo run:ios",
     "web": "expo start --web",
-    "postinstall": "node postinstall.js"
+    "postinstall": "node postinstall.js && sh postinstall.sh",
+    "build:ios": "react-native bundle --entry-file='index.js' --bundle-output='./ios/main.jsbundle' --dev=false --platform='ios'"
   },
   "dependencies": {
     "@expo/metro-runtime": "~3.1.3",
@@ -22,7 +23,6 @@
     "expo-image-picker": "^14.7.1",
     "expo-linear-gradient": "^12.7.2",
     "expo-location": "~16.5.5",
-    "expo-notifications": "^0.27.4",
     "expo-permissions": "^14.4.0",
     "expo-splash-screen": "^0.26.3",
     "expo-status-bar": "~1.11.1",
@@ -35,7 +35,7 @@
     "react-native-geocoding": "^0.5.0",
     "react-native-gesture-handler": "^2.14.1",
     "react-native-gifted-chat": "^2.4.0",
-    "react-native-maps": "^1.10.0",
+    "react-native-maps": "^1.11.3",
     "react-native-popup-menu": "^0.16.1",
     "react-native-reanimated": "^3.6.1",
     "react-native-safe-area-context": "^4.8.2",
@@ -49,7 +49,17 @@
     "socket.io-client": "^4.7.4"
   },
   "devDependencies": {
-    "@babel/core": "^7.20.0"
+    "@babel/core": "^7.20.0",
+    "@react-native/metro-config": "^0.75.0-main",
+    "@tsconfig/react-native": "^3.0.4",
+    "@types/jest": "^29.5.12",
+    "@types/node": "^20.11.30",
+    "@types/react": "^18.2.69",
+    "@types/react-native": "^0.73.0",
+    "@types/react-test-renderer": "^18.0.7",
+    "babel-plugin-module-resolver": "^5.0.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.4.3"
   },
   "private": true
 }

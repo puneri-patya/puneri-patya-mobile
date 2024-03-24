@@ -1,4 +1,4 @@
-import React, {useState, useCallback, useEffect, useRef} from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, FlatList, ActivityIndicator, Button } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigation } from '@react-navigation/native';
@@ -16,7 +16,7 @@ const UserPostsScreen = (props) => {
     const [isRefreshing, setIsRefreshing] = useState(false);
     const [error, setError] = useState();
     const refUserPosts = useRef(null);
-    
+
     const { route } = props;
     const userId = route.params.userId;
     const postIndex = route.params.postIndex;
@@ -43,7 +43,7 @@ const UserPostsScreen = (props) => {
 
     useEffect(() => {
         const unsubscribe = navigation.addListener('focus', e => {
-            if(refUserPosts.current){
+            if (refUserPosts.current) {
                 refUserPosts.current.scrollToIndex({ animated: true, index: postIndex });
             }
         });
@@ -52,12 +52,12 @@ const UserPostsScreen = (props) => {
             unsubscribe();
         };
     }, [])
-    
+
 
 
     const toggleLikeHandler = async (postId, isLiked) => {
         try {
-            if(isLiked){
+            if (isLiked) {
                 await dispatch(postsActions.unlikePost(postId))
             } else {
                 await dispatch(postsActions.likePost(postId))
@@ -67,7 +67,7 @@ const UserPostsScreen = (props) => {
         }
     }
 
-    if(error){
+    if (error) {
         return (
             <View style={styles.centered} >
                 <Text>An error occured.</Text>
@@ -77,7 +77,7 @@ const UserPostsScreen = (props) => {
     }
 
 
-    if(isLoading){
+    if (isLoading) {
         return (
             <View style={styles.centered} >
                 <ActivityIndicator size='large' color={Colors.primary} />
@@ -86,8 +86,8 @@ const UserPostsScreen = (props) => {
     }
 
 
-    if(!isLoading && posts.length === 0){
-        return(
+    if (!isLoading && posts.length === 0) {
+        return (
             <View style={styles.centered} >
                 <Text>No posts found. Maybe start adding some!</Text>
             </View>
@@ -109,32 +109,32 @@ const UserPostsScreen = (props) => {
                         refUserPosts.current?.scrollToIndex({ index: info.index, animated: true });
                     });
                 }}
-                keyExtractor={(item) => item._id }
+                keyExtractor={(item) => item._id}
                 ItemSeparatorComponent={() => {
                     return (
                         <View style={styles.separator} />
                     )
                 }}
-                renderItem={({item, index}) => {
+                renderItem={({ item, index }) => {
                     return (
-                        <Card 
-                            post={item} 
+                        <Card
+                            post={item}
                             userId={loggedInUserId}
-                            toggleLikeHandler={toggleLikeHandler} 
+                            toggleLikeHandler={toggleLikeHandler}
                             index={index}
                             fromUserProfile={fromUserProfile}
                         />
                     );
-                }} 
+                }}
             />
 
         </View>
     );
 };
 
-export const screenOptions = {
-    headerTitle: 'Posts'
-}
+export const screenOptions = ({ route }) => ({
+    title: `${route.params.name}'s Patya`
+});
 
 
 const styles = StyleSheet.create({

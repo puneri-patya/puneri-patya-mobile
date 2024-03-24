@@ -95,7 +95,7 @@ const CommentsScreen = (props) => {
                 <Text style={Styles.description}>{post.body}</Text>
             </View>
             <View style={Styles.row}>
-                <Text style={{ width: '100%', borderColor: Colors.primary, borderWidth: 1, height: 1, marginBottom: 10 }}></Text>
+                <Text style={Styles.underline}></Text>
             </View>
 
             <FlatList
@@ -147,20 +147,25 @@ const CommentsScreen = (props) => {
 };
 
 
-export const screenOptions = {
-    headerTitle: 'Comments',
-}
+export const screenOptions = ({ route }) => ({
+    title: `Comments for ${route.params.title}`
+});
+//headerTitle: navigation.setOptions({ title: 'Comments' + postId})
 
 const styles = StyleSheet.create({
     root: {
         backgroundColor: "#ffffff",
-        marginBottom: 45
+        //marginBottom: 45
     },
+
+
 
     container: {
         flex: 1,
         paddingHorizontal: 10,
         backgroundColor: "#ffffff",
+        position: 'relative',
+        // marginTop: 48,
     },
     cardHeader: {
         paddingTop: 16,

@@ -2,10 +2,13 @@ import Colors from "./Colors";
 
 export default {
     titleContainer: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: 'white'
+        // flex: 1,
+        justifyContent: 'flex-start',
+        alignItems: 'flex-start',
+        backgroundColor: 'white',
+        width: '100%',
+        alignContent: 'flex-start',
+
     },
     pageTitle: {
         fontSize: 24,
@@ -75,6 +78,140 @@ export default {
         fontFamily: 'MuseoModerno-SemiBold',
         fontSize: 14,
         color: "#fff",
-    }
+    },
 
+    whiteText: {
+        color: "#fff",
+        fontFamily: 'MuseoModerno-SemiBold',
+    },
+
+    underline: {
+        width: '100%',
+        borderColor: Colors.primary,
+        borderWidth: 1,
+        height: 1,
+        marginBottom: 10
+    },
+    h1: {
+        fontFamily: 'MuseoModerno-Bold',
+        fontSize: 24,
+        color: 'black',
+        marginBottom: 10
+    },
+    "ms-2": {
+        marginLeft: 6,
+    },
+    labelContainer: {
+        alignSelf: 'flex-start',
+        marginLeft: 2
+    },
+    labelText: {
+        fontSize: 14,
+        fontWeight: 'bold',
+        paddingVertical: 8,
+        color: Colors.primary,
+        fontFamily: 'MuseoModerno-SemiBold'
+    },
+    inputContainer: {
+        backgroundColor: '#FFFFFF',
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: '#FFFFFF',
+        width: '100%',
+        marginBottom: 10,
+        flexDirection: 'row',
+        alignItems: 'start',
+        shadowColor: "#808080",
+        shadowOffset: {
+            width: 0,
+            height: 1,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+        elevation: 5,
+    },
+    inputContainerActive: {
+        backgroundColor: '#FFFFFF',
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: Colors.primary,
+        width: '100%',
+        marginBottom: 10,
+        flexDirection: 'row',
+        alignItems: 'start',
+        shadowColor: Colors.primary,
+        shadowOffset: {
+            width: 0,
+            height: 1,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+        elevation: 5,
+    },
+    inputContainerActiveRed: {
+        backgroundColor: '#FFFFFF',
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: Colors.heartColor,
+        width: '100%',
+        marginBottom: 10,
+        flexDirection: 'row',
+        alignItems: 'start',
+        shadowColor: Colors.heartColor,
+        shadowOffset: {
+            width: 0,
+            height: 1,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+        elevation: 5,
+    },
+    inputs: {
+        height: 36,
+        marginLeft: 10,
+        borderBottomColor: '#FFFFFF',
+        flex: 1,
+        paddingRight: 10,
+        textAlignVertical: 'top',
+        fontFamily: 'MuseoModerno-Light',
+    },
+    buttonContainer: {
+        height: 45,
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginVertical: 4,
+        width: '100%',
+        borderRadius: 8,
+        backgroundColor: 'transparent',
+    },
+    buttonPrimary: {
+        backgroundColor: Colors.primary,
+        shadowColor: "#808080",
+        shadowOffset: {
+            width: 0,
+            height: 9,
+        },
+        shadowOpacity: 0.50,
+        shadowRadius: 12.35,
+
+        elevation: 10,
+    },
+    buttonSecondary: {
+        backgroundColor: Colors.secondary,
+        shadowColor: "#808080",
+        shadowOffset: {
+            width: 0,
+            height: 9,
+        },
+        shadowOpacity: 0.50,
+        shadowRadius: 12.35,
+
+        elevation: 10,
+    },
+    buttonText: {
+        color: 'white',
+        fontWeight: 'bold',
+        fontFamily: 'MuseoModerno-SemiBold'
+    },
 }

@@ -12,10 +12,10 @@ import { showMessage } from "react-native-flash-message";
 const EditPostScreen = (props) => {
 
     const postId = props.route.params.postId;
-    const selectedPost = useSelector(state => 
+    const selectedPost = useSelector(state =>
         state.posts.allPosts.find(post => post._id === postId)
     );
-    
+
     const [editImage, setEditImage] = useState({
         uri: `${ENV.apiUrl}/post/photo/${postId}`
     });
@@ -39,21 +39,21 @@ const EditPostScreen = (props) => {
 
     const validatePost = () => {
 
-        let strLength = base64Data.length;
-        let sizeInBytes = 4 * Math.ceil((strLength / 3))*0.5624896334383812;
-        let sizeInKb = sizeInBytes/1000;
-        console.log(sizeInKb);
-        if(sizeInKb > 100){
-            showMessage({
-                message: "Image size should be less than 150KB.",
-                type: "danger",
-                duration: 3000,
-                icon: { icon: "danger", position: 'left' }
-            });
-            return false;
-        }
+        //let strLength = base64Data.length;
+        //let sizeInBytes = 4 * Math.ceil((strLength / 3))*0.5624896334383812;
+        //let sizeInKb = sizeInBytes/1000;
+        //console.log(sizeInKb);
+        // if(sizeInKb > 100){
+        //     showMessage({
+        //         message: "Image size should be less than 150KB.",
+        //         type: "danger",
+        //         duration: 3000,
+        //         icon: { icon: "danger", position: 'left' }
+        //     });
+        //     return false;
+        // }
 
-        if(!title || title.length === 0){
+        if (!title || title.length === 0) {
             showMessage({
                 message: "Please enter a title.",
                 type: "danger",
@@ -62,7 +62,7 @@ const EditPostScreen = (props) => {
             });
             return false;
         }
-        if(!body || body.length === 0){
+        if (!body || body.length === 0) {
             showMessage({
                 message: "Please enter a body.",
                 type: "danger",
@@ -80,7 +80,7 @@ const EditPostScreen = (props) => {
 
     const updatePost = async () => {
         setIsLoading(true);
-        if(validatePost()){
+        if (validatePost()) {
             try {
                 await dispatch(postActions.updatePost(postId, title, body, base64Data, imageType));
                 clearForm();
@@ -98,9 +98,9 @@ const EditPostScreen = (props) => {
                     duration: 3000,
                     icon: { icon: "danger", position: 'left' }
                 });
-                console.log("ERROR ",error.message);
+                console.log("ERROR ", error.message);
             }
-        } 
+        }
         setIsLoading(false);
     }
 
@@ -109,7 +109,7 @@ const EditPostScreen = (props) => {
         setImageType(imageType);
     }
 
-    return(
+    return (
         <ScrollView>
             <KeyboardAvoidingView style={styles.screen} behavior="padding" >
                 <View style={styles.container}>
@@ -120,12 +120,12 @@ const EditPostScreen = (props) => {
                         </View>
                     )} */}
 
-                    <ImgPicker 
-                        onImageTaken={imagePickedHandler} 
+                    <ImgPicker
+                        onImageTaken={imagePickedHandler}
                         editImage={editImage}
                         previousUpdate={previousUpdate}
                     />
-                    
+
                     <View style={styles.labelContainer} >
                         <Text style={styles.labelText} >Title</Text>
                     </View>
@@ -133,8 +133,8 @@ const EditPostScreen = (props) => {
                         <TextInput style={styles.inputs}
                             placeholder="Title"
                             underlineColorAndroid='transparent'
-                            value={ title}
-                            onChangeText={(text) => setTitle(text) }
+                            value={title}
+                            onChangeText={(text) => setTitle(text)}
                         />
                     </View>
 
@@ -146,27 +146,27 @@ const EditPostScreen = (props) => {
                             placeholder="Body"
                             underlineColorAndroid='transparent'
                             value={body}
-                            onChangeText={(text) => setBody(text) }
+                            onChangeText={(text) => setBody(text)}
                         />
                     </View>
 
-                    <TouchableOpacity 
+                    <TouchableOpacity
                         style={[styles.buttonContainer, styles.loginButton]}
                         onPress={updatePost}
                     >
 
-                        { isLoading ? (
+                        {isLoading ? (
                             <ActivityIndicator size="small" color="#fff" />
-                        )  :(
+                        ) : (
                             <Text style={styles.loginText}>
                                 Update
                             </Text>
-                        ) }
-                        
+                        )}
+
                     </TouchableOpacity>
 
-                    </View>   
-                
+                </View>
+
             </KeyboardAvoidingView>
 
         </ScrollView>
@@ -191,7 +191,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
 
-    errorMsgContainer:{
+    errorMsgContainer: {
         display: 'flex',
         flexDirection: 'row',
         justifyContent: 'center',
@@ -201,7 +201,7 @@ const styles = StyleSheet.create({
         marginHorizontal: 20,
         borderWidth: 1,
         borderColor: '#D8000C',
-        backgroundColor: "#FFBABA" ,
+        backgroundColor: "#FFBABA",
         color: "#D8000C",
         borderRadius: 25,
     },

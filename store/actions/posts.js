@@ -28,6 +28,22 @@ export const fetchPosts = () => {
 };
 
 
+export const getPostPhoto = (postId) => {
+    return async (dispatch, getState) => {
+        const token = getState().auth.token;
+        const response = await fetch(`${ENV.apiUrl}/post/photo/${postId}`, {
+            method: "GET",
+            headers: {
+                'Content-Type': "application/json",
+                Authorization: `Bearer ${token}`
+            }
+        });
+        //const resData = await response.json();
+        return response;
+    }
+}
+
+
 
 export const createPost = (title, description, base64Data, imageType, location) => {
     return async (dispatch, getState) => {
@@ -96,15 +112,15 @@ export const deletePost = (postId) => {
 };
 
 
-export const updatePost = (postId, title, body, base64Data, imageType) => {
+export const updatePost = (postId, title, body, base64Data, imageType, location) => {
     return async (dispatch, getState) => {
         const token = getState().auth.token;
         let postData;
         // const userId = getState().auth.user._id;
         if (!base64Data || !imageType || (base64Data === '' && imageType === '')) {
-            postData = { title, body }
+            postData = { title, body, latitude: location.latitude, longitude: location.longitude }
         } else {
-            postData = { title, body, base64Data, imageType }
+            postData = { title, body, base64Data, imageType, latitude: location.latitude, longitude: location.longitude }
         }
         const response = await fetch(`${ENV.apiUrl}/rn/post/${postId}`, {
             method: "PUT",
@@ -127,6 +143,8 @@ export const updatePost = (postId, title, body, base64Data, imageType) => {
                 comments: resData.comments,
                 created: new Date(resData.created),
                 likes: resData.likes,
+                latitude: resData.latitude,
+                longitude: resData.longitude,
                 postedBy: {
                     _id: resData.postedBy._id,
                     name: resData.postedBy.name

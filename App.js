@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { createStore, combineReducers, applyMiddleware } from 'redux';
 import { Provider } from 'react-redux';
 import ReduxThunk from 'redux-thunk';
@@ -32,7 +32,7 @@ const store = createStore(
 
 export default function App() {
 
-  const [fontsLoaded] = useFonts({
+  const [fontsLoaded, fontError] = useFonts({
     // 'Gluten-Black': require('./assets/fonts/Gluten-Black.ttf'),
     // 'Gluten-Bold': require('./assets/fonts/Gluten-Bold.ttf'),
     // 'Gluten-ExtraBold': require('./assets/fonts/Gluten-ExtraBold.ttf'),
@@ -55,8 +55,18 @@ export default function App() {
 
   });
 
+  const onLayoutRootView = useCallback(async () => {
+    if (fontsLoaded || fontError) {
+      await SplashScreen.hideAsync();
+    }
+  }, [fontsLoaded, fontError]);
+
+  if (!fontsLoaded && !fontError) {
+    return null;
+  }
+
   return (
-    <NativeBaseProvider>
+    <NativeBaseProvider onLayoutRootView={onLayoutRootView}>
       <Provider store={store}>
         <MenuProvider style={{ flex: 1 }}>
           <AppNavigator />

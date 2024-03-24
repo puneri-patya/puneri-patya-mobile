@@ -8,10 +8,11 @@ import {
     Image,
     ActivityIndicator,
     Vibration,
-    Platform,
-    Alert,
+    // Platform,
+    // Alert,
     Appearance,
-    useColorScheme
+    useColorScheme,
+    Platform
 } from 'react-native';
 
 
@@ -20,10 +21,12 @@ import * as authActions from '../../store/actions/auth';
 import { useDispatch } from 'react-redux';
 import Colors from '../../constants/Colors';
 
-import * as Notifications from 'expo-notifications';
-import * as Permissions from 'expo-permissions';
-import Constants from 'expo-constants';
-import LinearGradient from 'expo-linear-gradient';
+// import * as Notifications from 'expo-notifications';
+// import * as Permissions from 'expo-permissions';
+// import Constants from 'expo-constants';
+import { LinearGradient } from 'expo-linear-gradient';
+import Styles from '../../constants/Styles';
+import { KeyboardAvoidingView } from 'native-base';
 
 
 const AuthScreen = (props) => {
@@ -37,56 +40,59 @@ const AuthScreen = (props) => {
 
     const [expoPushToken, setExpoPushToken] = useState('');
     const [notification, setNotification] = useState({});
+    const [isNameFocused, setIsNameFocused] = useState(false);
+    const [isEmailFocused, setIsEmailFocused] = useState(false);
+    const [isPasswordFocused, setIsPasswordFocused] = useState(false);
 
     const dispatch = useDispatch();
     let token;
     let _notificationSubscription;
 
-    const registerForPushNotificationsAsync = async () => {
-        if (Constants.isDevice) {
-            const { status: existingStatus } = await Permissions.getAsync(Permissions.NOTIFICATIONS);
-            let finalStatus = existingStatus;
-            if (existingStatus !== 'granted') {
-                const { status } = await Permissions.askAsync(Permissions.NOTIFICATIONS);
-                finalStatus = status;
-            }
-            if (finalStatus !== 'granted') {
-                Alert.alert(
-                    'Failed !',
-                    'Failed to get push token for push notification!',
-                    [{ text: 'Okay' }]
-                );
-                return;
-            }
-            try {
-                token = await Notifications.getExpoPushTokenAsync();
-            } catch (err) {
-                showMessage({
-                    message: `ERROR - ${err.message}`,
-                    description: `${err}`,
-                    type: "danger",
-                    icon: { icon: "danger", position: 'left' },
-                    duration: 3000
-                });
-            }
-            console.log(token);
-            setExpoPushToken(token);
-        } else {
-            Alert.alert(
-                'Error !',
-                'Must use physical device for Push Notifications',
-                [{ text: 'Okay' }]
-            )
-        }
-        if (Platform.OS === 'android') {
-            Notifications.createChannelAndroidAsync('default', {
-                name: 'default',
-                sound: true,
-                priority: 'max',
-                vibrate: [0, 250, 250, 250],
-            });
-        }
-    };
+    // const registerForPushNotificationsAsync = async () => {
+    //     if (Constants.isDevice) {
+    //         const { status: existingStatus } = await Permissions.getAsync(Permissions.NOTIFICATIONS);
+    //         let finalStatus = existingStatus;
+    //         if (existingStatus !== 'granted') {
+    //             const { status } = await Permissions.askAsync(Permissions.NOTIFICATIONS);
+    //             finalStatus = status;
+    //         }
+    //         if (finalStatus !== 'granted') {
+    //             Alert.alert(
+    //                 'Failed !',
+    //                 'Failed to get push token for push notification!',
+    //                 [{ text: 'Okay' }]
+    //             );
+    //             return;
+    //         }
+    //         try {
+    //             token = await Notifications.getExpoPushTokenAsync();
+    //         } catch (err) {
+    //             showMessage({
+    //                 message: `ERROR - ${err.message}`,
+    //                 description: `${err}`,
+    //                 type: "danger",
+    //                 icon: { icon: "danger", position: 'left' },
+    //                 duration: 3000
+    //             });
+    //         }
+    //         console.log(token);
+    //         setExpoPushToken(token);
+    //     } else {
+    //         Alert.alert(
+    //             'Error !',
+    //             'Must use physical device for Push Notifications',
+    //             [{ text: 'Okay' }]
+    //         )
+    //     }
+    //     if (Platform.OS === 'android') {
+    //         Notifications.createChannelAndroidAsync('default', {
+    //             name: 'default',
+    //             sound: true,
+    //             priority: 'max',
+    //             vibrate: [0, 250, 250, 250],
+    //         });
+    //     }
+    // };
 
     var isDark = useColorScheme() === 'dark';
     Appearance.addChangeListener(({ colorScheme }) => isDark = colorScheme === 'dark');
@@ -237,6 +243,9 @@ const AuthScreen = (props) => {
             backgroundColor: 'red',
             width: '100%',
         },
+        gradientContainer: {
+            paddingHorizontal: 30
+        },
         topComponent: {
             marginTop: 80,
         },
@@ -344,7 +353,7 @@ const AuthScreen = (props) => {
             backgroundColor: 'transparent'
         },
         btnForgotPassword: {
-            height: 15,
+            // height: 15,
             flexDirection: 'row',
             justifyContent: 'flex-end',
             alignItems: 'flex-end',
@@ -380,7 +389,8 @@ const AuthScreen = (props) => {
         },
         blackText: {
             color: "black",
-            fontWeight: 'bold'
+            fontWeight: 'bold',
+            fontFamily: 'MuseoModerno-SemiBold',
         },
         bgImage: {
             flex: 1,
@@ -402,88 +412,115 @@ const AuthScreen = (props) => {
 
     return (
         <View style={styles.container}>
-            {/* <LinearGradient colors={['#ffffff', '#e3e9f2', '#5b94f7', '#bd3a3f']} locations={[0, 0.40, 0.64, 1]} style={styles.container}> */}
-            <View style={styles.topComponent} >
-                <Text style={styles.msgText}></Text>
-            </View>
-            <View style={styles.titleContainer} >
-                <Image source={require('../../assets/logo.png')} />
-            </View>
+            <LinearGradient colors={['#ffffff', Colors.cardBackground, '#5b94f7', '#bd3a3f']} locations={[0, 0.60, 0.94, 1]} style={[styles.container, styles.gradientContainer]}>
 
-            {isSignup && (
-                <View style={styles.inputContainer}>
-                    <TextInput style={styles.inputs}
-                        placeholder="Name"
-                        underlineColorAndroid='transparent'
-                        value={name}
-                        onChangeText={(text) => inputChangeHandler(text, 1)}
-                    />
-                    <Image style={styles.inputIcon} source={{ uri: 'https://img.icons8.com/nolan/40/000000/name.png' }} />
+                <View style={styles.topComponent} >
+                    <Text style={styles.msgText}></Text>
                 </View>
-            )}
-
-            <View style={styles.inputContainer}>
-                <TextInput style={styles.inputs}
-                    placeholder="Email"
-                    secureTextEntry={false}
-                    keyboardType="email-address"
-                    underlineColorAndroid='transparent'
-                    value={email}
-                    onChangeText={(text) => inputChangeHandler(text, 2)}
-                />
-                <Image style={styles.inputIcon} source={{ uri: 'https://img.icons8.com/nolan/40/000000/email.png' }} />
-            </View>
-
-            <View style={styles.inputContainer}>
-                <TextInput style={styles.inputs}
-                    placeholder="Password"
-                    secureTextEntry={true}
-                    underlineColorAndroid='transparent'
-                    value={password}
-                    onChangeText={(text) => inputChangeHandler(text, 3)}
-                />
-                <Image style={styles.inputIcon} source={{ uri: 'https://img.icons8.com/nolan/40/000000/key.png' }} />
-            </View>
-
-            {!isSignup && (
-                <TouchableOpacity
-                    onPress={() => props.navigation.navigate('ForgotPassword')}
-                    style={styles.btnForgotPassword}
-                >
-                    <Text style={styles.blackText}>Forgot your password?</Text>
-                </TouchableOpacity>)}
-
-            <TouchableOpacity
-                style={[styles.buttonContainer, styles.loginButton]}
-                onPress={AuthHandler}
-            >
-
-                {isLoading ? (
-                    <ActivityIndicator size="small" color="#fff" />
-                ) : (
-                    <Text style={styles.whiteText}>
-                        {isSignup ? "Register" : "Login"}
-                    </Text>
-                )}
-
-            </TouchableOpacity>
-
-
-            <TouchableOpacity
-                style={[styles.buttonContainer, styles.registerButton]}
-                onPress={() => {
-                    setIsSignUp(prevState => !prevState);
-                }}
-            >
-                <Text style={styles.whiteText} >
-                    {isSignup ? "Already a user ? Login" : "Don't have an account ? Register"}
-                </Text>
-            </TouchableOpacity>
-            {!isSignup && (
                 <View style={styles.titleContainer} >
-                    <Image source={require('../../assets/pati.gif')} style={styles.pati} />
-                </View>)}
-            {/* </LinearGradient> */}
+                    <Image source={require('../../assets/logo.png')} />
+                </View>
+
+                <KeyboardAvoidingView style={styles.screen} behavior={Platform.OS === 'ios' ? 'padding' : 'height'} >
+                    {isSignup && (
+                        <>
+                            <View style={Styles.labelContainer} >
+                                <Text style={Styles.labelText} >Name</Text>
+                            </View>
+                            <View style={isNameFocused ? Styles.inputContainerActiveRed : Styles.inputContainerActive}>
+                                <TextInput style={Styles.inputs}
+                                    placeholder="Name"
+                                    underlineColorAndroid='transparent'
+                                    value={name}
+                                    onChangeText={(text) => inputChangeHandler(text, 1)}
+                                    onFocus={() => setIsNameFocused(true)}
+                                    onBlur={() => setIsNameFocused(false)}
+                                />
+                            </View>
+                        </>
+                    )}
+
+                    <View style={Styles.labelContainer} >
+                        <Text style={Styles.labelText} >Email</Text>
+                    </View>
+                    <View style={isEmailFocused ? Styles.inputContainerActiveRed : Styles.inputContainerActive}>
+                        <TextInput style={Styles.inputs}
+                            placeholder="Email"
+                            keyboardType="email-address"
+                            inputMode='email'
+                            value={email}
+                            onChangeText={(text) => inputChangeHandler(text, 2)}
+                            autoComplete='email'
+                            textContentType='username'
+                            importantForAutofill='yes'
+                            autoCapitalize='none'
+                            onFocus={() => setIsEmailFocused(true)}
+                            onBlur={() => setIsEmailFocused(false)}
+                        />
+                    </View>
+
+                    <View style={Styles.labelContainer} >
+                        <Text style={Styles.labelText} >Password</Text>
+                    </View>
+                    <View style={isPasswordFocused ? Styles.inputContainerActiveRed : Styles.inputContainerActive}>
+                        <TextInput style={Styles.inputs}
+                            placeholder="Password"
+                            secureTextEntry={true}
+                            value={password}
+                            onChangeText={(text) => inputChangeHandler(text, 3)}
+                            textContentType='password'
+                            autoComplete='password'
+                            importantForAutofill='yes'
+                            onFocus={() => setIsPasswordFocused(true)}
+                            onBlur={() => setIsPasswordFocused(false)}
+
+                        />
+                    </View>
+
+                    {!isSignup && (
+                        <TouchableOpacity
+                            onPress={() => props.navigation.navigate('ForgotPassword')}
+                            style={styles.btnForgotPassword}
+                        >
+                            <Text style={styles.blackText}>Forgot your password?</Text>
+                        </TouchableOpacity>)}
+
+                    <View style={Styles.buttonContainer} >
+                        <TouchableOpacity
+                            style={[Styles.buttonContainer, Styles.buttonPrimary]}
+                            onPress={AuthHandler}
+                        >
+
+                            {isLoading ? (
+                                <ActivityIndicator size="small" color="#fff" />
+                            ) : (
+                                <Text style={Styles.buttonText}>
+                                    {isSignup ? "Register" : "Login"}
+                                </Text>
+                            )}
+
+                        </TouchableOpacity>
+                    </View>
+
+
+                    <View style={Styles.buttonContainer} >
+                        <TouchableOpacity
+                            style={[Styles.buttonContainer, styles.registerButton]}
+                            onPress={() => {
+                                setIsSignUp(prevState => !prevState);
+                            }}
+                        >
+                            <Text style={Styles.buttonText} >
+                                {isSignup ? "Already a user ? Login" : "Don't have an account ? Register"}
+                            </Text>
+                        </TouchableOpacity>
+                    </View>
+                </KeyboardAvoidingView>
+                {!isSignup && (
+                    <View style={styles.titleContainer} >
+                        <Image source={require('../../assets/pati.gif')} style={styles.pati} />
+                    </View>)}
+            </LinearGradient>
         </View>
     );
 }

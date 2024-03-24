@@ -21,29 +21,20 @@ import ChatScreen, { screenOptions as chatScreenOptions } from '../screens/chat/
 
 import AuthScreen from '../screens/auth/AuthScreen';
 import ForgotPasswordScreen, { screenOptions as forgotPasswordScreenOptions } from '../screens/auth/ForgotPasswordScreen';
-import { Text } from 'react-native';
-import { getHeaderTitle } from '@react-navigation/elements';
 import Styles from '../constants/Styles';
 import { PageTitle } from '../components/UI/PageTitle';
-import { BlurView } from 'expo-blur';
 import { TabBarButton } from '../components/UI/TabBarButton';
-
-
+import { Header } from '../components/UI/Header';
+import MenuItem from '../components/UI/MenuItem';
 
 const defaultNavOptions = {
-    headerStyle: {
-        backgroundColor: Platform.OS === 'android' ? Colors.brightBlue : Colors.primary
+    headerTitle: (props) => (<Header title={props.children} />),
+    headerBackTitle: ' ',
+    headerBackTitleStyle: {
+        fontFamily: 'MuseoModerno-Light',
+        fontSize: 14,
     },
-    // headerTitle: {
-    //     fontFamily: 'open-sans-bold'
-    // },
-    // headerBackTitleStyle: {
-    //     fontFamily: 'open-sans'
-    // },
-    headerTintColor: Platform.OS === 'android' ? 'white' : Colors.brightBlue,
-    headerTransparent: true,
-    headerShown: false,
-    headerBackTitle: 'Back',
+    headerShown: true,
 };
 
 
@@ -95,8 +86,8 @@ const PostNavigator = () => {
             />
             <PostStackNavigator.Screen
                 name="EditPost"
-                component={EditPostScreen}
-                options={editPostScreenOptions}
+                component={AddPostScreen}
+                options={addPostScreenOptions}
             />
             <PostStackNavigator.Screen
                 name="ChatList"
@@ -269,23 +260,33 @@ export const BottomNavigator = () => {
                     headerShown: true,
                     headerTitleAlign: 'left',
                     headerTitleStyle: { ...Styles.pageTitle },
-                    headerTitle: 'New Pati',
+                    headerTitle: (props) => (<PageTitle title={'New Pati'} />),
                 }}
             />
 
             <BottomTabNavigator.Screen
                 name="YourProfile"
                 component={UserNavigator}
-                options={{
-                    tabBarLabel: 'Profile',
+                options={({ route }) => ({
+                    tabBarVisible: getTabBarVisibility(route),
+                    tabBarLabel: 'Me',
+                    headerShown: true,
+                    headerTitleAlign: 'left',
+                    headerShadowVisible: false,
+                    // headerTitleStyle: { ...Styles.pageTitle },
+                    headerTitle: (props) => (<PageTitle title={'My Profile'} />),
                     tabBarIcon: (props) => (
                         <Ionicons
                             name={'person'}
                             size={20}
                             color={props.color}
                         />
+                    ),
+                    tabBarIconStyle: { marginTop: 8 },
+                    headerRight: () => (
+                        <MenuItem />
                     )
-                }}
+                })}
             />
 
         </BottomTabNavigator.Navigator >
