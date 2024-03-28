@@ -6,12 +6,11 @@ export const InputStyles = StyleSheet.create({
         backgroundColor: '#FFFFFF',
         borderRadius: 8,
         borderWidth: 1,
-        borderColor: '#FFFFFF',
+        borderColor: Colors.primary,
         width: '100%',
         marginBottom: 10,
         flexDirection: 'row',
-        // alignItems: 'start',
-        shadowColor: "#808080",
+        shadowColor: Colors.primary,
         shadowOffset: {
             width: 0,
             height: 1,
@@ -24,12 +23,11 @@ export const InputStyles = StyleSheet.create({
         backgroundColor: '#FFFFFF',
         borderRadius: 8,
         borderWidth: 1,
-        borderColor: Colors.primary,
+        borderColor: Colors.heartColor,
         width: '100%',
         marginBottom: 10,
         flexDirection: 'row',
-        // alignItems: 'start',
-        shadowColor: Colors.primary,
+        shadowColor: Colors.heartColor,
         shadowOffset: {
             width: 0,
             height: 1,
@@ -37,6 +35,7 @@ export const InputStyles = StyleSheet.create({
         shadowOpacity: 0.25,
         shadowRadius: 3.84,
         elevation: 5,
+
     },
     inputContainerActiveRed: {
         width: "100%",

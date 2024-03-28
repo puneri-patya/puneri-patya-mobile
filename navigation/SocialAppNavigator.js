@@ -6,10 +6,9 @@ import { Ionicons } from '@expo/vector-icons';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 
-import AllPostsScreen, { screenOptions as allPostsScreenOptions } from '../screens/post/AllPostsScreen';
-import EditPostScreen, { screenOptions as editPostScreenOptions } from '../screens/post/EditPostScreen';
-import CommentsScreen, { screenOptions as commentsScreenOptions } from '../screens/post/CommentsScreen';
-import AddPostScreen, { screenOptions as addPostScreenOptions } from '../screens/post/AddPostScreen';
+import AllPatyaScreen, { screenOptions as allPostsScreenOptions } from '../screens/pati/AllPatyaScreen';
+import { CommentsScreen, screenOptions as commentsScreenOptions } from '../screens/pati/CommentsScreen';
+import AddPatiScreen, { screenOptions as addPostScreenOptions } from '../screens/pati/AddPatiScreen';
 import UserProfileScreen, { screenOptions as userProfileScreenOptions } from '../screens/user/UserProfileScreen';
 import FindPeopleScreen from '../screens/user/FindPeopleScreen';
 import UserStatsScreen, { screenOptions as userStatsScreenOptions } from '../screens/user/UserStatsScreen';
@@ -24,7 +23,7 @@ import ForgotPasswordScreen, { screenOptions as forgotPasswordScreenOptions } fr
 import Styles from '../constants/Styles';
 import { PageTitle } from '../components/UI/PageTitle';
 import { TabBarButton } from '../components/UI/TabBarButton';
-import { Header } from '../components/UI/Header';
+import { Header } from '../components/UI/typography/Header';
 import MenuItem from '../components/UI/MenuItem';
 
 const defaultNavOptions = {
@@ -60,7 +59,7 @@ const PostNavigator = () => {
         >
             <PostStackNavigator.Screen
                 name="AllPosts"
-                component={AllPostsScreen}
+                component={AllPatyaScreen}
                 options={allPostsScreenOptions}
             />
             <PostStackNavigator.Screen
@@ -86,7 +85,7 @@ const PostNavigator = () => {
             />
             <PostStackNavigator.Screen
                 name="EditPost"
-                component={AddPostScreen}
+                component={AddPatiScreen}
                 options={addPostScreenOptions}
             />
             <PostStackNavigator.Screen
@@ -152,7 +151,7 @@ const CreatePostNavigator = () => {
         >
             <CreatePostStackNavigator.Screen
                 name="CreatePost"
-                component={AddPostScreen}
+                component={AddPatiScreen}
                 options={addPostScreenOptions}
             />
         </CreatePostStackNavigator.Navigator>

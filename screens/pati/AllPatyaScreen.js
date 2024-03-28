@@ -1,18 +1,15 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, FlatList, ActivityIndicator, Button, Platform, AsyncStorage } from 'react-native';
+import { View, Text, StyleSheet, FlatList, ActivityIndicator, Button } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
-import { useNavigation } from '@react-navigation/native';
-import { Ionicons } from '@expo/vector-icons'
 
 import Card from '../../components/UI/Card';
 import Colors from '../../constants/Colors';
 
 import * as postsActions from '../../store/actions/posts';
 import * as usersActions from '../../store/actions/users';
-import * as chatActions from '../../store/actions/chat';
 
 
-const AllPostsScreen = (props) => {
+const AllPatyaScreen = () => {
 
     const [isLoading, setIsLoading] = useState(false);
     const [isRefreshing, setIsRefreshing] = useState(false);
@@ -23,8 +20,6 @@ const AllPostsScreen = (props) => {
     const posts = useSelector(state => state.posts.allPosts);
     const loggedUser = useSelector(state => state.auth.user);
     const dispatch = useDispatch();
-    const navigation = useNavigation();
-
 
     const loadPosts = useCallback(async () => {
         setError(null);
@@ -32,7 +27,7 @@ const AllPostsScreen = (props) => {
         try {
             await dispatch(postsActions.fetchPosts());
             await dispatch(usersActions.fetchUsers());
-            await dispatch(chatActions.fetchChatList());
+            //await dispatch(chatActions.fetchChatList());
 
         } catch (err) {
             setError(err.message);
@@ -42,7 +37,6 @@ const AllPostsScreen = (props) => {
 
 
     const toggleLikeHandler = async (postId, isLiked) => {
-
         try {
             if (isLiked) {
                 await dispatch(postsActions.unlikePost(postId))
@@ -53,28 +47,6 @@ const AllPostsScreen = (props) => {
             console.log("ERROR ", error)
         }
     }
-
-
-
-    // useEffect(() => {
-    //     const unsubscribe = props.navigation.addListener('focus', loadPosts);
-
-    //     return () => {
-    //         unsubscribe();
-    //     };
-    // }, [loadPosts])
-    // useEffect(() => {
-    //     const unsubscribe = navigation.dangerouslyGetParent().addListener('tabPress', e => {
-    //         console.log("TAB PRESSED");
-    //         if(refPosts.current){
-    //             refPosts.current.scrollToIndex({ animated: true, index: 0 });
-    //         }
-    //     });
-
-    //     return () => {
-    //         unsubscribe();
-    //     };
-    // }, [])
 
     useEffect(() => {
         setIsLoading(true);
@@ -93,7 +65,6 @@ const AllPostsScreen = (props) => {
         );
     }
 
-
     if (isLoading) {
         return (
             <View style={styles.centered} >
@@ -102,11 +73,10 @@ const AllPostsScreen = (props) => {
         );
     }
 
-
     if (!isLoading && posts.length === 0) {
         return (
             <View style={styles.centered} >
-                <Text>No posts found. Maybe start adding some!</Text>
+                <Text style={styles.text}>No patya found. {"\n"}Maybe start adding some!</Text>
             </View>
         );
     }
@@ -127,7 +97,6 @@ const AllPostsScreen = (props) => {
                     )
                 }}
                 renderItem={(post) => {
-                    console.log("posts - ", post.index);
                     return (
                         <Card post={post.item} userId={loggedUser._id} toggleLikeHandler={toggleLikeHandler} />
                     )
@@ -140,28 +109,9 @@ const AllPostsScreen = (props) => {
 
 
 
-export const screenOptions = (navData) => {
+export const screenOptions = () => {
     return {
         headerShown: false,
-        headerTitle: 'All Patya',
-        headerLeft: () => (
-            <Ionicons
-                name={'menu'}
-                size={24}
-                color={Platform.OS === 'android' ? '#fff' : Colors.brightBlue}
-                style={{ padding: 15, marginLeft: 5 }}
-                onPress={() => navData.navigation.toggleDrawer()}
-            />
-        ),
-        // headerRight: () => (
-        //     <Ionicons
-        //         name={'chatbox'}
-        //         size = {24}
-        //         color={Platform.OS === 'android' ? '#fff' : Colors.brightBlue}
-        //         style={{  padding: 15, marginRight: 5 }}
-        //         onPress={() => navData.navigation.navigate('ChatList')}
-        //     />
-        // )
     };
 }
 
@@ -200,4 +150,4 @@ const styles = StyleSheet.create({
 
 })
 
-export default AllPostsScreen;
+export default AllPatyaScreen;

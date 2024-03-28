@@ -29,6 +29,7 @@ import MenuItem from "../../components/UI/MenuItem";
 import { showMessage } from "react-native-flash-message";
 import VerifiedUser from "../../constants/VerifiedUser";
 import Styles from "../../constants/Styles";
+import { showSuccessMessage, showWarningMessage } from "../../helpers/ShowMessage";
 
 
 const UserProfileScreen = (props) => {
@@ -84,33 +85,15 @@ const UserProfileScreen = (props) => {
         delete user.created;
         delete user.followers;
         delete user.following;
-        // setIsFollowLoading(true);
 
         if (checkFollow(user._id)) {
-            showMessage({
-                message: `Your have unfollowed ${user.name}.`,
-                type: "warning",
-                duration: 3000,
-                icon: { icon: "warning", position: 'left' }
-            });
-            await dispatch(usersActions.unfollowUser(user))
+            await dispatch(usersActions.unfollowUser(user));
+            showWarningMessage(`Your have unfollowed ${user.name}.`);
         } else {
-            showMessage({
-                message: `Your are now following ${user.name}.`,
-                type: "success",
-                duration: 3000,
-                icon: { icon: "success", position: 'left' }
-            });
-            await dispatch(usersActions.followUser(user))
+            await dispatch(usersActions.followUser(user));
+            showSuccessMessage(`Your are now following ${user.name}.`)
         }
-        // setIsFollowLoading(false);
     }
-
-
-
-
-
-
 
     const renderSectionOne = () => {
         if (currUserPosts.length === 0) {

@@ -3,10 +3,7 @@ import {
     StyleSheet,
     Text,
     View,
-    TextInput,
-    TouchableOpacity,
     Image,
-    ActivityIndicator,
 } from 'react-native';
 
 import { showMessage } from "react-native-flash-message";
@@ -15,26 +12,23 @@ import * as authActions from '../../store/actions/auth';
 import { useDispatch } from 'react-redux';
 import Colors from '../../constants/Colors';
 import { LinearGradient } from 'expo-linear-gradient';
-import Styles from '../../constants/Styles';
+import { InputWithLabel } from '../../components/UI/form/InputWithLabel';
+import { Button } from '../../components/UI/form/Button';
+import { showErrorMessage, showSuccessMessage } from '../../helpers/ShowMessage';
 
 const ForgotPasswordScreen = (props) => {
 
-    const [email, setEmail] = useState('');
+    const emailState = useState('');
+    const [email, setEmail] = emailState;
 
     const [isLoading, setIsLoading] = useState(false);
-    const [isEmailFocused, setIsEmailFocused] = useState(false);
 
     const dispatch = useDispatch();
 
     const validateAuthForm = () => {
         const emailRegex = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
         if (!emailRegex.test(email.toLowerCase())) {
-            showMessage({
-                message: "Please enter a valid email.",
-                type: "danger",
-                icon: { icon: "danger", position: 'left' },
-                duration: 3000
-            });
+            showErrorMessage("Please enter a valid email.");
             return false;
         }
 
@@ -47,20 +41,10 @@ const ForgotPasswordScreen = (props) => {
         if (validateAuthForm()) {
             try {
                 const msg = await dispatch(authActions.forgotPassword(email))
-                showMessage({
-                    message: msg,
-                    type: "success",
-                    icon: { icon: "success", position: 'left' },
-                    duration: 4000
-                });
+                showSuccessMessage(msg);
                 setEmail('');
             } catch (error) {
-                showMessage({
-                    message: error.message,
-                    type: "danger",
-                    icon: { icon: "danger", position: 'left' },
-                    duration: 3000
-                });
+                showErrorMessage(error.message);
             }
         }
         setIsLoading(false);
@@ -76,59 +60,20 @@ const ForgotPasswordScreen = (props) => {
                 <View style={styles.titleContainer} >
                     <Image source={require('../../assets/logo.png')} />
                 </View>
-                {/* <View style={styles.padding20} ><Text>&nbsp;</Text></View> */}
-                <View style={Styles.labelContainer} >
-                    <Text style={Styles.labelText} >Email</Text>
-                </View>
-                <View style={isEmailFocused ? Styles.inputContainerActiveRed : Styles.inputContainerActive}>
-                    <TextInput style={Styles.inputs}
-                        placeholder="Email"
-                        keyboardType="email-address"
-                        inputMode='email'
-                        value={email}
-                        onChangeText={(text) => inputChangeHandler(text, 2)}
-                        autoComplete='email'
-                        textContentType='username'
-                        importantForAutofill='yes'
-                        autoCapitalize='none'
-                        onFocus={() => setIsEmailFocused(true)}
-                        onBlur={() => setIsEmailFocused(false)}
-                        autoFocus={true}
-                    />
-                </View>
-
-                <View style={Styles.buttonContainer} >
-                    <TouchableOpacity
-                        style={[Styles.buttonContainer, Styles.buttonPrimary]}
-                        onPress={AuthHandler}
-                    >
-
-                        {isLoading ? (
-                            <ActivityIndicator size="small" color="#fff" />
-                        ) : (
-                            <Text style={Styles.buttonText}>
-                                Send Password Reset Link
-                            </Text>
-                        )}
-
-                    </TouchableOpacity>
-                </View>
-                <View style={Styles.buttonContainer} >
-                    <TouchableOpacity
-                        style={[Styles.buttonContainer, Styles.buttonSecondary]}
-                        onPress={() => props.navigation.navigate('Auth')}
-                    >
-
-                        {isLoading ? (
-                            <ActivityIndicator size="small" color="#fff" />
-                        ) : (
-                            <Text style={styles.whiteText}>
-                                Return to Login
-                            </Text>
-                        )}
-
-                    </TouchableOpacity>
-                </View>
+                <InputWithLabel
+                    placeholder="Email"
+                    label="Email"
+                    inputState={emailState}
+                    onChangeText={(text) => setEmail(text)}
+                    keyboardType="email-address"
+                    inputMode='email'
+                    autoComplete='email'
+                    textContentType='username'
+                    importantForAutofill='yes'
+                    autoCapitalize='none'
+                />
+                <Button label="Send Password Reset Link" onPress={AuthHandler} isLoading={isLoading} variant='primary' round={true} />
+                <Button type="link" label="Return to Login" onPress={() => props.navigation.navigate('Auth')} isLoading={isLoading} round={true} />
             </LinearGradient>
         </View>
     );

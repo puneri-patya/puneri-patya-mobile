@@ -16,6 +16,7 @@ import { useNavigation } from '@react-navigation/native';
 import { useDispatch } from 'react-redux';
 import * as authActions from '../../store/actions/auth';
 import { showMessage } from "react-native-flash-message";
+import { showSuccessMessage } from '../../helpers/ShowMessage';
 
 const MenuItem = () => {
 
@@ -48,13 +49,8 @@ const MenuItem = () => {
                     </MenuOption> */}
                     <MenuOption
                         onSelect={async () => {
-                            await dispatch(authActions.logout())
-                            showMessage({
-                                message: `You have successfully logged out.`,
-                                type: "success",
-                                duration: 3000,
-                                icon: { icon: "success", position: 'left' }
-                            });
+                            await dispatch(authActions.logout());
+                            showSuccessMessage(`You have successfully logged out.`);
                         }}
                     >
                         <View style={{ flexDirection: 'row' }} >

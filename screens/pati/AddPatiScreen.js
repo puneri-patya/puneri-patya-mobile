@@ -1,11 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import {
     View,
-    Text,
     StyleSheet,
-    TextInput,
-    TouchableOpacity,
-    ActivityIndicator,
     KeyboardAvoidingView,
     ScrollView,
     Platform
@@ -15,14 +11,16 @@ import { useDispatch, useSelector } from 'react-redux';
 import * as postActions from '../../store/actions/posts';
 import ImgPicker from '../../components/app/ImgPicker';
 import Colors from '../../constants/Colors';
-import { showMessage } from "react-native-flash-message";
 import MapView, { Marker } from 'react-native-maps';
 import * as Location from 'expo-location';
 import ENV from '../../env';
 import { InputWithLabel } from '../../components/UI/form/InputWithLabel';
+import { Label } from '../../components/UI/form/Label';
+import { Button } from '../../components/UI/form/Button';
+import { showErrorMessage, showSuccessMessage } from '../../helpers/ShowMessage';
 
 
-const AddPostScreen = (props) => {
+const AddPatiScreen = (props) => {
 
     const [clearPickedImage, setClearPickedImage] = useState(false);
 
@@ -30,11 +28,11 @@ const AddPostScreen = (props) => {
     const [title, setTitle] = titleState;
     const bodyState = useState('');
     const [body, setBody] = bodyState;
+    const locationAddressState = useState('');
+    const [locationAddress, setLocationAddress] = locationAddressState;
+
     const [imageType, setImageType] = useState('');
     const [imageSize, setImageSize] = useState(0);
-    const [isTitleFocused, setIsTitleFocused] = useState(false);
-    const [isDescFocused, setIsDescFocused] = useState(false);
-    const [locationAddress, setLocationAddress] = useState('');
     const mapMarker = useRef(null);
 
     const [isLoading, setIsLoading] = useState(false);
@@ -42,7 +40,7 @@ const AddPostScreen = (props) => {
 
     const postId = props.route.params?.postId;
 
-    const [editImage, setEditImage] = useState({
+    const [editImage,] = useState({
         uri: `${ENV.apiUrl}/post/photo/${postId}`
     });
     const [previousUpdate, setPreviousUpdate] = useState('');
@@ -67,12 +65,7 @@ const AddPostScreen = (props) => {
             let { status } = await Location.requestForegroundPermissionsAsync();
             if (status !== 'granted') {
                 console.error('Permission to access location was denied');
-                showMessage({
-                    message: "Location not enabled. Please enable location to post.",
-                    type: "danger",
-                    duration: 3000,
-                    icon: { icon: "danger", position: 'left' }
-                });
+                showErrorMessage("Location not enabled. Please enable location to post.");
                 return;
             }
 
@@ -118,35 +111,23 @@ const AddPostScreen = (props) => {
     }
 
     const validatePost = () => {
+        const errors = [];
         if (!title || title.length === 0) {
-            showMessage({
-                message: "Please enter a title.",
-                type: "danger",
-                duration: 3000,
-                icon: { icon: "danger", position: 'left' }
-            });
-            return false;
+            errors.push("Please enter a title for pati.");
         }
         if (!body || body.length === 0) {
-            showMessage({
-                message: "Please enter a body.",
-                type: "danger",
-                duration: 3000,
-                icon: { icon: "danger", position: 'left' }
-            });
-            return false;
+            errors.push("Please enter a description for pati.");
         }
         if (base64Data.length === 0) {
-            showMessage({
-                message: "Please select an image to post.",
-                type: "danger",
-                duration: 3000,
-                icon: { icon: "danger", position: 'left' }
-            });
-            return false;
+            errors.push("Please select an image to post.");
         }
 
-        return true;
+        if (errors.length > 0) {
+            showErrorMessage(errors.join("\n"));
+            return false;
+        } else {
+            return true;
+        }
     }
 
     const createPost = async () => {
@@ -156,20 +137,10 @@ const AddPostScreen = (props) => {
             try {
                 await dispatch(postActions.createPost(title, body, base64Data, imageType, location.markerCoordinate));
                 clearForm();
-                props.navigation.navigate('AllPosts')
-                showMessage({
-                    message: "Your post was successfully created.",
-                    type: "success",
-                    duration: 3000,
-                    icon: { icon: "success", position: 'left' }
-                });
+                props.navigation.navigate('AllPosts');
+                showSuccessMessage("Your pati was successfully submitted.");
             } catch (error) {
-                showMessage({
-                    message: error.message,
-                    type: "danger",
-                    duration: 3000,
-                    icon: { icon: "danger", position: 'left' }
-                });
+                showErrorMessage(error.message);
                 console.log("ERROR ", error.message);
             }
         }
@@ -183,19 +154,9 @@ const AddPostScreen = (props) => {
                 await dispatch(postActions.updatePost(postId, title, body, base64Data, imageType, location.markerCoordinate));
                 clearForm();
                 props.navigation.goBack();
-                showMessage({
-                    message: "Your post was successfully edited.",
-                    type: "success",
-                    duration: 3000,
-                    icon: { icon: "success", position: 'left' }
-                });
+                showSuccessMessage("Your pati was updated successfully.");
             } catch (error) {
-                showMessage({
-                    message: error.message,
-                    type: "danger",
-                    duration: 3000,
-                    icon: { icon: "danger", position: 'left' }
-                });
+                showErrorMessage(error.message);
                 console.log("ERROR ", error.message);
             }
         }
@@ -212,7 +173,11 @@ const AddPostScreen = (props) => {
         <ScrollView style={{ backgroundColor: Colors.cardBackground }} >
             <KeyboardAvoidingView style={styles.screen} behavior={Platform.OS === 'ios' ? 'padding' : 'height'} >
                 <View style={styles.container}>
-                    <InputWithLabel label="Title" placeholder="Short summary of pati" inputState={titleState} onChangeText={(text) => setTitle(text)} />
+                    <InputWithLabel
+                        label="Title"
+                        placeholder="Short summary of pati"
+                        inputState={titleState}
+                        onChangeText={(text) => setTitle(text)} />
 
                     {!selectedPost ?
                         <ImgPicker
@@ -226,9 +191,8 @@ const AddPostScreen = (props) => {
                             previousUpdate={previousUpdate}
 
                         />}
-                    <View style={styles.labelContainer} >
-                        <Text style={styles.labelText} >Where is this pati located?</Text>
-                    </View>
+                    <Label label="Where is this pati located?" />
+
                     <View style={styles.noImagePreview} >
                         <MapView
                             style={styles.map}
@@ -248,16 +212,7 @@ const AddPostScreen = (props) => {
                         </MapView>
                     </View>
 
-                    <View style={styles.inputContainer}>
-                        <TextInput style={styles.mapInput}
-                            placeholder="Location of pati."
-                            underlineColorAndroid='transparent'
-                            multiline
-                            numberOfLines={2}
-                            value={locationAddress}
-                            editable={false}
-                        />
-                    </View>
+                    <Label label={locationAddress} varient='secondary' />
 
                     <InputWithLabel
                         label="Description"
@@ -267,29 +222,21 @@ const AddPostScreen = (props) => {
                         numberOfLines={4}
                         onChangeText={(text) => setBody(text)} />
 
-                    <TouchableOpacity
-                        style={[styles.buttonContainer, styles.loginButton]}
+                    <Button
+                        label={`${selectedPost ? 'Update' : 'Submit'} Pati`}
                         onPress={selectedPost ? updatePost : createPost}
-                    >
-                        {isLoading ? (
-                            <ActivityIndicator size="small" color="#fff" />
-                        ) : (
-                            <Text style={styles.loginText}>
-                                {`${selectedPost ? 'Update' : 'Submit'} Pati`}
-                            </Text>
-                        )}
-
-                    </TouchableOpacity>
+                        isLoading={isLoading}
+                        round={true}
+                        variant='primary'
+                    />
                 </View>
             </KeyboardAvoidingView>
         </ScrollView>
     );
 };
 
-
 export const screenOptions = ({ route }) => ({
     title: `Update Pati - ${route.params?.title}`,
-    // headerTitle: `Update Pati - ${route.params?.title}`,
     headerShown: route.params?.postId ? true : false,
 })
 
@@ -462,4 +409,4 @@ const styles = StyleSheet.create({
     }
 })
 
-export default AddPostScreen;
+export default AddPatiScreen;

@@ -10,7 +10,12 @@ export const LabelStyles = StyleSheet.create({
         fontSize: 14,
         fontWeight: 'bold',
         paddingVertical: 8,
-        color: Colors.primary,
         fontFamily: 'MuseoModerno-SemiBold'
     },
+    primary: {
+        color: Colors.primary
+    },
+    secondary: {
+        color: Colors.secondary
+    }
 });

@@ -1,6 +1,5 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity, ActivityIndicator, Platform, Alert, TouchableNativeFeedback, Dimensions, FlatList, KeyboardAvoidingView, TextInput, Linking } from 'react-native';
-import { Ionicons, MaterialCommunityIcons, Octicons } from '@expo/vector-icons';
+import React, { useState, useEffect, useCallback } from 'react';
+import { View, Text, StyleSheet, Image, Platform, Dimensions, FlatList, Linking } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 
 import { timeDifference } from '../../helpers/timeDifference';
@@ -10,20 +9,22 @@ import ENV from '../../env';
 import Comment from '../../components/UI/Comment';
 import { useDispatch } from 'react-redux';
 import * as postActions from '../../store/actions/posts';
-import { showMessage } from "react-native-flash-message";
-import VerifiedUser from '../../constants/VerifiedUser';
 import NewComment from './NewComment';
 import { reverseGeocodeAsync } from 'expo-location';
 import Styles from '../../constants/Styles';
+import { showErrorMessage, showSuccessMessage } from '../../helpers/ShowMessage';
+import { CustomImage } from './image/CustomImage';
+import { StyledText } from './typography/StyledText';
+import { VerifiedBadge } from './typography/VerifiedBadge';
+import { Button } from './form/Button';
+import { IconButtonWithLabel } from './form/IconButtonWithLabel';
+import { YesNoAlert } from './notifications/CustomAlert';
 
 const Card = (props) => {
-    const { post, userId, fromUserProfile } = props;
+    const { post, userId } = props;
     const navigation = useNavigation();
     const dispatch = useDispatch();
 
-    // const liked = post.likes.indexOf(userId) !== -1;
-
-    const [isImageLoading, setIsImageLoading] = useState(true);
     const [imageUri, setImageUri] = useState('')
     const [showFullBody, setShowFullBody] = useState(false);
     const [imgWidth, setImgWidth] = useState();
@@ -35,36 +36,13 @@ const Card = (props) => {
         setImageUri(ENV.defaultImageUri)
     }
 
-
-    let TouchableComp = TouchableOpacity;
-    if (Platform.OS === 'android' && Platform.Version >= 21) {
-        TouchableComp = TouchableNativeFeedback;
-    }
-
-
-    const getDisplayableDescription = (txt) => txt.length > 30 ? { val: `${txt.substring(0, 30)}...`, truncated: true } : { val: txt, truncated: false };
+    const getDisplayableDescription = useCallback((txt) => txt.length > 30 ? { val: `${txt.substring(0, 30)}...`, truncated: true } : { val: txt, truncated: false }, []);
 
     const deleteHandler = (id) => {
-        Alert.alert(
-            'Are you sure?',
-            'Do you really want to delete this pati?',
-            [
-                { text: 'No', style: 'default' },
-                {
-                    text: 'Yes',
-                    style: 'destructive',
-                    onPress: async () => {
-                        await dispatch(postActions.deletePost(id))
-                        showMessage({
-                            message: "Your pati was successfully deleted.",
-                            type: "success",
-                            icon: { icon: "success", position: 'left' },
-                            duration: 3000
-                        });
-                    }
-                }
-            ]
-        )
+        YesNoAlert('Are you sure?', 'Do you really want to delete this pati? This action cannot be undone.', async () => {
+            await dispatch(postActions.deletePost(id));
+            showSuccessMessage('Your pati was successfully deleted.');
+        })
     };
 
     const checkLike = () => {
@@ -73,9 +51,7 @@ const Card = (props) => {
     }
 
     const checkComment = () => {
-        //console.log('post.comments', post.comments)
-        let match = post.comments.filter(v => v.postedBy._id == userId).length > 0;
-        return match;
+        return post.comments.filter(v => v.postedBy._id == userId).length > 0;
     }
 
     const loadPosts = useCallback(async () => {
@@ -84,11 +60,7 @@ const Card = (props) => {
             await dispatch(postsActions.fetchPosts());
 
         } catch (err) {
-            Alert.alert(
-                'Error',
-                error.message,
-                [{ text: 'Okay' }]
-            );
+            showErrorMessage('Oops! Something went wrong.', err.message);
         }
         setIsRefreshing(false);
     }, [dispatch])
@@ -123,87 +95,66 @@ const Card = (props) => {
     useEffect(() => {
         const doIt = async () => {
             const loc = await reverseGeocodeAsync({ latitude: post.latitude, longitude: post.longitude });
-            console.log('loc', loc)
             const address = [loc[0].name, loc[0].streetNumber, loc[0].street, loc[0].city, loc[0].region, loc[0].country];
             setLocationDetails(address.filter(Boolean).join(', '));
         };
         doIt();
     }, []);
 
-
     return (
-        <View>
+        <>
             <View style={styles.card}>
                 <View style={styles.cardTitleHeader}>
-                    <View style={styles.row}>
-                        <View style={[styles.row, styles.userIconContainer]}>
-                            <Image
-                                style={styles.userIcon}
-                                source={{ uri: imageUri || `${ENV.apiUrl}/user/photo/${post.postedBy._id}?${new Date(post.postedBy.updated)}` }}
-                                onError={onImageErrorHandler}
-                            />
-                        </View>
-                        <View style={styles.column}>
-                            <View>
-                                <Text
-                                    style={styles.userName}
-                                    onPress={() => navigation.navigate('UserProfile', { userId: post.postedBy._id, name: post.postedBy.name })}
-                                >
-                                    {`${post.postedBy.name}`}
-                                    {
-                                        VerifiedUser.verifiedUsersId.includes(post.postedBy._id) && <Octicons name="verified" size={18} color={Colors.brightBlue} />
-                                    }
-                                </Text>
-                            </View>
-                            <View style={[styles.row, styles.timeDetails]}>
-                                <Ionicons
-                                    name={'time-outline'}
-                                    size={14}
-                                    style={[styles.timeDetails, styles.timeIcon]}
-                                />
-                                <Text style={styles.timeDetails}> {timeDifference(new Date(), new Date(post.created))} </Text>
-                            </View>
+                    <View style={Styles.row}>
+                        <CustomImage
+                            containerStyle={styles.userIconContainer}
+                            style={styles.userIcon}
+                            source={{ uri: imageUri || `${ENV.apiUrl}/user/photo/${post.postedBy._id}?${new Date(post.postedBy.updated)}` }}
+                            onImageError={onImageErrorHandler} />
+
+                        <View style={Styles.column}>
+                            <StyledText text={post.postedBy.name + ' '} varient='title'>
+                                <VerifiedBadge userId={post.postedBy._id} />
+                            </StyledText>
+
+                            <IconButtonWithLabel
+                                iconName={`clock-time-three-outline`}
+                                label={timeDifference(new Date(), new Date(post.created))}
+                                onPress={() => { }}
+                                containerStyle={styles.timeDetails}
+                                labelStyle={{ ...styles.timeDetails, marginLeft: -6 }}
+                                iconColor={Colors.primary}
+                                iconSize={12}
+                                labelPosition='right' />
                         </View>
                     </View>
                 </View>
-                <View style={styles.cardImageContainer} >
-                    <Image
-                        style={{ ...styles.cardImage, height: imgHeight }}
-                        source={{ uri: `${ENV.apiUrl}/post/photo/${post._id}?${new Date(post.updated)}` }}
-                        onLoad={() => setIsImageLoading(false)}
-                    />
-                    <ActivityIndicator
-                        style={{ position: 'absolute', left: 0, right: 0, top: 0, bottom: 0 }}
-                        animating={isImageLoading}
-                        size='large'
-                        color={Colors.brightBlue}
-                    />
-                </View>
+                <CustomImage
+                    containerStyle={styles.cardImageContainer}
+                    style={{ ...styles.cardImage, height: imgHeight }}
+                    source={{ uri: `${ENV.apiUrl}/post/photo/${post._id}?${new Date(post.updated)}` }}
+                    onImageError={onImageErrorHandler}
+                />
+
                 <View style={styles.cardHeader}>
                     <View style={{ width: '100%' }}>
-                        <Text style={styles.title}>{post.title || ""}</Text>
-                        <View>
-                            <Text style={styles.description}>
-                                {!showFullBody ? post.body : getDisplayableDescription(post.body).val}
-                                <Text
-                                    style={{ color: Colors.primary }}
-                                    onPress={() => setShowFullBody((prevState) => !prevState)}
-                                >{getDisplayableDescription(post.body).truncated ? showFullBody ? ' Read More' : ' Read Less' : ''}
-                                </Text>
+                        <StyledText text={post.title} varient='title' />
+                        <StyledText text={showFullBody ? post.body : getDisplayableDescription(post.body).val} varient='subTitle'>
+                            <Text
+                                style={{ color: Colors.primary }}
+                                onPress={() => setShowFullBody((prevState) => !prevState)}
+                            >{getDisplayableDescription(post.body).truncated ? showFullBody ? ' Read Less' : ' Read More' : ''}
                             </Text>
-                        </View>
-                        <TouchableOpacity
-                            style={Styles.locationContainer}
+                        </StyledText>
+
+                        <IconButtonWithLabel
+                            iconName='map-marker-outline'
+                            label={locationDetails}
                             onPress={openMap}
-                        >
-                            <Ionicons
-                                name={`location-outline`}
-                                size={24}
-                                style={{ marginRight: 5 }}
-                                color={Colors.primary}
-                            />
-                            <Text style={Styles.location}> {locationDetails} </Text>
-                        </TouchableOpacity>
+                            style={Styles.location}
+                            iconColor={Colors.primary}
+                            iconSize={24}
+                            labelPosition='right' />
                     </View>
 
                 </View>
@@ -211,32 +162,24 @@ const Card = (props) => {
                 <View style={styles.cardFooter}>
                     <View style={styles.socialBarContainer}>
                         <View style={styles.socialBarSection}>
-                            <TouchableOpacity
-                                style={styles.socialBarButton}
+                            <IconButtonWithLabel
+                                iconName={`${checkLike() ? 'cards-heart' : 'heart-outline'}`}
+                                label={post.likes.length}
                                 onPress={toggleLike}
-                            >
-                                <Ionicons
-                                    name={`heart-${checkLike() ? 'sharp' : 'outline'}`}
-                                    size={24}
-                                    style={{ marginRight: 5 }}
-                                    color={Colors.heartColor}
-                                />
-                                <Text style={[styles.socialBarLabel, { color: checkLike() ? Colors.heartColor : 'black' }]}> {post.likes.length} </Text>
-                            </TouchableOpacity>
+                                style={{ ...styles.socialBarLabel, color: checkLike() ? Colors.heartColor : 'black' }}
+                                iconColor={Colors.heartColor}
+                                iconSize={24}
+                                labelPosition='right' />
                         </View>
                         <View style={styles.socialBarSection}>
-                            <TouchableOpacity
-                                style={styles.socialBarButton}
+                            <IconButtonWithLabel
+                                iconName={'chat-outline'}
+                                label={post.comments.length}
                                 onPress={() => navigation.navigate('Comments', { postId: post._id, userId: userId, title: post.title })}
-                            >
-                                <Ionicons
-                                    name="chatbox-outline"
-                                    size={24}
-                                    style={{ marginRight: 5 }}
-                                    color={checkComment() ? Colors.primary : 'black'}
-                                />
-                                <Text style={[styles.socialBarLabel, { color: checkComment() ? Colors.primary : 'black' }]}> {post.comments.length} </Text>
-                            </TouchableOpacity>
+                                style={{ ...styles.socialBarLabel, color: checkComment() ? Colors.primary : 'black' }}
+                                iconColor={checkComment() ? Colors.primary : 'black'}
+                                iconSize={24}
+                                labelPosition='right' />
                         </View>
                     </View>
                 </View>
@@ -261,67 +204,52 @@ const Card = (props) => {
                             );
                         }}
                     />
+                    {post.comments.length > 2 && (
+                        <Button
+                            label={`View all ${post.comments.length} comments`}
+                            onPress={() => navigation.navigate('Comments', { postId: post._id, userId: userId, title: post.title })}
+                            type="link"
+                            style={{ flex: 1, justifyContent: 'flex-start', marginTop: -8, marginBottom: 0, marginLeft: 45 }} />
+                    )}
                     <NewComment userId={userId} postId={post._id} />
-
                 </View>
 
-                {post.comments.length > 2 && (
-                    <TouchableOpacity
-                        onPress={() => navigation.navigate('Comments', { postId: post._id, userId: userId, title: post.title })}
-                    >
-                        <Text style={styles.commentBar}>{`View all ${post.comments.length} comments`}</Text>
-                    </TouchableOpacity>
-                )}
                 {post.postedBy._id === userId && (
-
                     <View style={styles.postActions} >
-                        <View style={styles.socialBarSection}>
-                            <TouchableOpacity
-                                style={styles.socialBarButton}
-                                onPress={() => navigation.navigate('EditPost', { postId: post._id, title: post.title })}
-                            >
-                                <MaterialCommunityIcons
-                                    name="square-edit-outline"
-                                    size={20}
-                                    style={{ marginRight: 5 }}
-                                    color={Colors.lightAccent}
-                                />
-                                <Text style={styles.socialBarLabel}>Edit This Pati</Text>
-                            </TouchableOpacity>
-                        </View>
-                        <View style={styles.socialBarSection}>
-                            <TouchableOpacity
-                                style={styles.socialBarButton}
-                                onPress={deleteHandler.bind(this, post._id)}
-                            >
-                                <MaterialCommunityIcons
-                                    name="delete"
-                                    size={20}
-                                    style={{ marginRight: 5 }}
-                                    color={Colors.heartColor}
-                                />
-                                <Text style={styles.socialBarLabel}>Delete This Pati</Text>
-                            </TouchableOpacity>
-                        </View>
+                        <IconButtonWithLabel
+                            iconName={'square-edit-outline'}
+                            label={'Edit This Pati'}
+                            onPress={() => navigation.navigate('EditPost', { postId: post._id, title: post.title })}
+                            style={{ ...styles.socialBarLabel, color: 'black' }}
+                            iconColor={Colors.lightAccent}
+                            iconSize={24}
+                            labelPosition='right' />
 
+                        <IconButtonWithLabel
+                            iconName={'delete'}
+                            label={'Delete This Pati'}
+                            onPress={deleteHandler.bind(this, post._id)}
+                            style={{ ...styles.socialBarLabel, color: 'black' }}
+                            iconColor={Colors.heartColor}
+                            iconSize={24}
+                            labelPosition='right' />
                     </View>
                 )}
 
             </View>
 
-        </View>
+        </>
     );
 };
 
 const styles = StyleSheet.create({
     userIconContainer: {
-        // paddingEnd: 20,
         paddingHorizontal: 10,
     },
     userIcon: {
-        height: 30,
-        width: 30,
-        borderRadius: 30,
+        height: 32,
+        width: 32,
+        borderRadius: 32,
 
     },
     card: {
@@ -355,11 +283,6 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         width: '100%',
     },
-    cardContent: {
-        paddingVertical: 12.5,
-        paddingHorizontal: 16,
-
-    },
     cardFooter: {
         flexDirection: 'row',
         justifyContent: 'space-between',
@@ -369,50 +292,23 @@ const styles = StyleSheet.create({
         borderBottomLeftRadius: 1,
         borderBottomRightRadius: 1,
     },
-    commentBar: {
-        paddingHorizontal: 10,
-        paddingBottom: 15,
-        paddingTop: 5,
-        fontFamily: 'MuseoModerno-Light',
-    },
     cardImageContainer: {
         backgroundColor: '#c2c2c2',
         flex: 1,
         display: 'flex',
-        // height: 275 
     },
     cardImage: {
         flex: 1,
-        // height: 275,
         width: null
     },
-    row: {
-        display: 'flex',
-        flexDirection: 'row',
-        alignContent: 'flex-start'
-    },
 
-    column: {
-        display: 'flex',
-        flexDirection: 'column',
-        alignContent: 'flex-start'
-    },
-
-    /******** card components **************/
-    userName: {
-        fontFamily: 'MuseoModerno-SemiBold',
-        fontSize: 16,
-        marginTop: -5
-    },
     timeDetails: {
         fontFamily: 'MuseoModerno-Light',
         fontSize: 11,
         color: Colors.primary,
         marginTop: -2
     },
-    timeIcon: {
-        marginTop: 2
-    },
+
     title: {
         fontFamily: 'MuseoModerno-SemiBold',
         fontSize: 16,
@@ -435,18 +331,7 @@ const styles = StyleSheet.create({
         width: 25,
         height: 25,
     },
-    iconData: {
-        width: 15,
-        height: 15,
-        marginTop: 5,
-        marginRight: 5
-    },
-    timeContainer: {
-        flexDirection: 'row',
-        flex: 1,
-    },
 
-    /******** social bar ******************/
     socialBarContainer: {
         flexDirection: 'row'
     },
@@ -457,11 +342,6 @@ const styles = StyleSheet.create({
         fontFamily: 'MuseoModerno-SemiBold',
         fontSize: 14,
         marginLeft: 0,
-    },
-    socialBarButton: {
-        flexDirection: 'row',
-        justifyContent: 'center',
-        alignItems: 'center',
     },
     postActions: {
         borderTopColor: '#c2c2c2',

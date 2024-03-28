@@ -10,6 +10,7 @@ import * as usersActions from '../../store/actions/users';
 import { showMessage } from "react-native-flash-message";
 import VerifiedUser from '../../constants/VerifiedUser';
 import { Octicons } from '@expo/vector-icons';
+import { showSuccessMessage, showWarningMessage } from '../../helpers/ShowMessage';
 
 
 
@@ -33,21 +34,11 @@ const ListItem = (props) => {
 
     const followUserHandler = async () => {
         // setIsLoading(true);
-        if(checkFollow(user._id)){
-            showMessage({
-                message: `Your have unfollowed ${user.name}.`,
-                type: "warning",
-                duration: 3000,
-                icon: { icon: "warning", position: 'left' }
-            });
+        if (checkFollow(user._id)) {
+            showWarningMessage(`Your have unfollowed ${user.name}.`);
             await dispatch(usersActions.unfollowUser(user))
         } else {
-            showMessage({
-                message: `Your are now following ${user.name}.`,
-                type: "success",
-                duration: 3000,
-                icon: { icon: "success", position: 'left' }
-            });
+            showSuccessMessage(`Your are now following ${user.name}.`);
             await dispatch(usersActions.followUser(user))
         }
         // setIsLoading(false);
@@ -68,7 +59,7 @@ const ListItem = (props) => {
     return (
         <View style={styles.container}>
             <Image
-                source={{ uri: imageUri }} 
+                source={{ uri: imageUri }}
                 onError={onImageErrorHandler}
                 style={styles.avatar}
             />
@@ -76,46 +67,46 @@ const ListItem = (props) => {
                 <View style={styles.mainContent}>
                     <View style={styles.text}>
                         <Text
-                            onPress={() => navigation.navigate('Home', { screen: 'UserProfile', params: { userId: user._id, name: user.name }})}
+                            onPress={() => navigation.navigate('Home', { screen: 'UserProfile', params: { userId: user._id, name: user.name } })}
                             style={styles.name}
                         >
-                            { user.name + " " }
+                            {user.name + " "}
                             {
                                 VerifiedUser.verifiedUsersId.includes(user._id) && <Octicons name="verified" size={18} color={Colors.brightBlue} />
                             }
                         </Text>
                     </View>
                     <Text style={styles.timeAgo}>
-                        { user.email }
+                        {user.email}
                     </Text>
                 </View>
-                { user._id !== loggedInUser._id && (
-                    <View style={{ position: 'absolute', right: 0}} >
-                        { checkFollow(user._id) ? (
+                {user._id !== loggedInUser._id && (
+                    <View style={{ position: 'absolute', right: 0 }} >
+                        {checkFollow(user._id) ? (
                             <TouchableOpacity
                                 onPress={followUserHandler}
-                                style={{  backgroundColor: Colors.brightBlue, padding: 10, borderRadius: 15 }}
+                                style={{ backgroundColor: Colors.brightBlue, padding: 10, borderRadius: 15 }}
                             >
-                                { isLoading ? (
+                                {isLoading ? (
                                     <ActivityIndicator size="small" color="#fff" />
                                 ) : (
                                     <Text style={{ color: '#fff' }} >UnFollow</Text>
-                                ) }
+                                )}
                             </TouchableOpacity>
                         ) : (
                             <TouchableOpacity
                                 onPress={followUserHandler}
-                                style={{  backgroundColor: Colors.brightBlue, padding: 10, borderRadius: 15 }}
+                                style={{ backgroundColor: Colors.brightBlue, padding: 10, borderRadius: 15 }}
                             >
-                                { isLoading ? (
+                                {isLoading ? (
                                     <ActivityIndicator size="small" color="#fff" />
                                 ) : (
                                     <Text style={{ color: '#fff' }} >Follow</Text>
                                 )}
                             </TouchableOpacity>
-                        ) }
+                        )}
                     </View>
-                ) }
+                )}
             </View>
         </View>
     );
@@ -128,46 +119,46 @@ const styles = StyleSheet.create({
         borderBottomWidth: 1,
         borderColor: "#FFFFFF",
         alignItems: 'flex-start',
-      },
-      avatar: {
-        width:50,
-        height:50,
-        borderRadius:25,
+    },
+    avatar: {
+        width: 50,
+        height: 50,
+        borderRadius: 25,
         backgroundColor: '#c2c2c2'
-      },
-      text: {
+    },
+    text: {
         marginBottom: 5,
         flexDirection: 'row',
-        flexWrap:'wrap'
-      },
-      content: {
+        flexWrap: 'wrap'
+    },
+    content: {
         flex: 1,
         marginLeft: 16,
         marginRight: 0
-      },
-      mainContent: {
+    },
+    mainContent: {
         marginRight: 60
-      },
-      img: {
+    },
+    img: {
         height: 50,
         width: 50,
         margin: 0
-      },
-      attachment: {
-          
-      },
-      separator: {
+    },
+    attachment: {
+
+    },
+    separator: {
         height: 1,
         backgroundColor: "#CCCCCC"
-      },
-      timeAgo:{
-        fontSize:12,
-        color:"#696969"
-      },
-      name:{
-        fontSize:16,
-        color:"#1E90FF"
-      }
+    },
+    timeAgo: {
+        fontSize: 12,
+        color: "#696969"
+    },
+    name: {
+        fontSize: 16,
+        color: "#1E90FF"
+    }
 })
 
 export default ListItem;

@@ -9,6 +9,7 @@ import Colors from '../../constants/Colors';
 import ENV from '../../env';
 import { showMessage } from "react-native-flash-message";
 import Styles from '../../constants/Styles';
+import { showErrorMessage, showSuccessMessage } from '../../helpers/ShowMessage';
 
 const EditProfileScreen = (props) => {
 
@@ -56,49 +57,28 @@ const EditProfileScreen = (props) => {
         //     });
         //     return false;
         // }
-
+        const errors = [];
         if (!name || name.length < 3) {
-            showMessage({
-                message: "Name is too short. Please enter atleast 3 characters.",
-                type: "danger",
-                icon: { icon: "danger", position: 'left' }
-            });
-            return false;
+            errors.push("Name is too short. Please enter atleast 3 characters.");
         }
 
         if (!about || about.length === 0) {
-            showMessage({
-                message: "Please write something about yourself.",
-                type: "danger",
-                icon: { icon: "danger", position: 'left' }
-            });
-            return false;
+            errors.push("Please write something about yourself.");
         }
 
         if (!emailRegex.test(email.toLowerCase())) {
-            showMessage({
-                message: "Please enter a valid email.",
-                type: "danger",
-                icon: { icon: "danger", position: 'left' }
-            });
-            return false;
+            errors.push("Please enter a valid email.");
         }
 
         if (password.length > 0 && password.length < 6) {
-            showMessage({
-                message: "Password should be atleast 6 characters long.",
-                type: "danger",
-                icon: { icon: "danger", position: 'left' }
-            });
-            return false;
-
+            errors.push("Password should be atleast 6 characters long.");
         }
         if (password.length > 0 && !passwordRegex.test(password)) {
-            showMessage({
-                message: "Password should contain atleast 1 number.",
-                type: "danger",
-                icon: { icon: "danger", position: 'left' }
-            });
+            errors.push("Password should contain atleast 1 number.");
+        }
+
+        if (errors.length > 0) {
+            showErrorMessage(errors.join("\n"));
             return false;
         }
         return true;
@@ -111,18 +91,9 @@ const EditProfileScreen = (props) => {
                 await dispatch(usersActions.updateProfile(name, email, about, password, base64Data, imageType));
                 clearForm();
                 props.navigation.navigate('YourProfile', { screen: 'UserProfile' });
-                showMessage({
-                    message: "Your profile was successfully edited.",
-                    type: "success",
-                    duration: 3000,
-                    icon: { icon: "success", position: 'left' }
-                });
+                showSuccessMessage("Your profile changes were successfully saved.")
             } catch (error) {
-                showMessage({
-                    message: error.message,
-                    type: "danger",
-                    icon: { icon: "danger", position: 'left' }
-                });
+                showErrorMessage(error.message);
                 console.log("ERROR ", error.message);
             }
         }

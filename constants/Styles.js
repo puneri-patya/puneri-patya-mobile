@@ -74,6 +74,12 @@ export default {
         alignContent: 'flex-start'
     },
 
+    column: {
+        display: 'flex',
+        flexDirection: 'column',
+        alignContent: 'flex-start'
+    },
+
     button: {
         fontFamily: 'MuseoModerno-SemiBold',
         fontSize: 14,

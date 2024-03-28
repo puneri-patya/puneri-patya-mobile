@@ -3,13 +3,8 @@ import {
     StyleSheet,
     Text,
     View,
-    TextInput,
-    TouchableOpacity,
     Image,
-    ActivityIndicator,
     Vibration,
-    // Platform,
-    // Alert,
     Appearance,
     useColorScheme,
     Platform
@@ -21,28 +16,27 @@ import * as authActions from '../../store/actions/auth';
 import { useDispatch } from 'react-redux';
 import Colors from '../../constants/Colors';
 
-// import * as Notifications from 'expo-notifications';
-// import * as Permissions from 'expo-permissions';
-// import Constants from 'expo-constants';
 import { LinearGradient } from 'expo-linear-gradient';
-import Styles from '../../constants/Styles';
 import { KeyboardAvoidingView } from 'native-base';
+import { InputWithLabel } from '../../components/UI/form/InputWithLabel';
+import { Button } from '../../components/UI/form/Button';
+import { showErrorMessage, showSuccessMessage } from '../../helpers/ShowMessage';
 
 
 const AuthScreen = (props) => {
 
     const [isSignup, setIsSignUp] = useState(false);
-    const [name, setName] = useState('');
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
+    const nameState = useState('');
+    const [name, setName] = nameState;
+    const emailState = useState('');
+    const [email, setEmail] = emailState;
+    const passwordState = useState('');
+    const [password, setPassword] = passwordState;
 
     const [isLoading, setIsLoading] = useState(false);
 
     const [expoPushToken, setExpoPushToken] = useState('');
     const [notification, setNotification] = useState({});
-    const [isNameFocused, setIsNameFocused] = useState(false);
-    const [isEmailFocused, setIsEmailFocused] = useState(false);
-    const [isPasswordFocused, setIsPasswordFocused] = useState(false);
 
     const dispatch = useDispatch();
     let token;
@@ -111,68 +105,34 @@ const AuthScreen = (props) => {
     const validateAuthForm = () => {
         const emailRegex = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
         const passwordRegex = /\d/
+        const errors = [];
         if (isSignup && !name) {
-            showMessage({
-                message: "Please enter a valid name.",
-                type: "danger",
-                icon: { icon: "danger", position: 'left' },
-                duration: 3000
-            });
-            setIsLoading(false);
-            return false;
+            errors.push('Please enter a valid name.');
         }
-        if (isSignup && name && name.length < 2) {
-            showMessage({
-                message: "Please enter a valid name.",
-                type: "danger",
-                icon: { icon: "danger", position: 'left' },
-                duration: 3000
-            });
-            setIsLoading(false);
-            return false;
-        }
-        if (!emailRegex.test(email.toLowerCase())) {
-            showMessage({
-                message: "Please enter a valid email.",
-                type: "danger",
-                icon: { icon: "danger", position: 'left' },
-                duration: 3000
-            });
-            setIsLoading(false);
-            return false;
-        }
-        if (!password || password.length === 0) {
-            showMessage({
-                message: "Please enter your password.",
-                type: "danger",
-                icon: { icon: "danger", position: 'left' },
-                duration: 3000
-            });
-            setIsLoading(false);
-            return false;
-        }
-        if (isSignup && password.length < 6) {
-            showMessage({
-                message: "Password should be atleast 6 characters long.",
-                type: "danger",
-                icon: { icon: "danger", position: 'left' },
-                duration: 3000
-            });
-            setIsLoading(false);
-            return false;
 
+        if (isSignup && name && name.length < 2) {
+            errors.push('Name should be atleast 2 characters long.');
         }
-        if (isSignup && !passwordRegex.test(password)) {
-            showMessage({
-                message: "Password should contain atleast 1 number.",
-                type: "danger",
-                icon: { icon: "danger", position: 'left' },
-                duration: 3000
-            });
+
+        if (!emailRegex.test(email.toLowerCase())) {
+            errors.push('Please enter a valid email.');
+        }
+
+        if (!password || password.length === 0) {
+            errors.push('Please enter your password.');
+        } else if (isSignup && password.length < 6) {
+            errors.push('Password should be atleast 6 characters long.');
+        } else if (isSignup && !passwordRegex.test(password)) {
+            errors.push('Password should contain atleast 1 number.');
+        }
+
+        if (errors.length > 0) {
+            showErrorMessage(`${errors.length > 1 ? 'Multiple errors' : 'One error'} found.`, errors.join('\n'));
             setIsLoading(false);
             return false;
+        } else {
+            return true;
         }
-        return true;
     }
 
     const AuthHandler = async () => {
@@ -181,42 +141,21 @@ const AuthScreen = (props) => {
             if (isSignup) {
                 try {
                     const msg = await dispatch(authActions.signup(name, email, password, expoPushToken))
-                    showMessage({
-                        message: "Signup Success",
-                        description: 'Please Login !',
-                        type: "success",
-                        icon: { icon: "success", position: 'left' },
-                        duration: 3000
-                    });
+                    showSuccessMessage("Signup Success. Please login.");
                     setIsSignUp(false);
                     setName('');
                     setEmail('');
                     setPassword('');
                 } catch (error) {
-                    showMessage({
-                        message: error.message,
-                        type: "danger",
-                        icon: { icon: "danger", position: 'left' },
-                        duration: 3000
-                    });
+                    showErrorMessage(error.message);
                 }
                 setIsLoading(false);
             } else {
                 try {
                     await dispatch(authActions.signin(email, password, expoPushToken))
-                    showMessage({
-                        message: "Welcome to Puneri Patya.com",
-                        type: "success",
-                        icon: { icon: "success", position: 'left' },
-                        duration: 3000
-                    });
+                    showSuccessMessage("Welcome to Puneri Patya.com");
                 } catch (error) {
-                    showMessage({
-                        message: error.message,
-                        type: "danger",
-                        icon: { icon: "danger", position: 'left' },
-                        duration: 3000
-                    });
+                    showErrorMessage(error.message);
                     setIsLoading(false);
                 }
             }
@@ -252,161 +191,17 @@ const AuthScreen = (props) => {
         titleContainer: {
             marginBottom: 20,
         },
-        title: {
-            fontSize: 42,
-            color: '#fff',
-            fontWeight: 'bold',
 
-            textShadowOffset: { width: 0, height: 1 },
-            textShadowRadius: 1,
-            textShadowColor: 'black',
-
-            textShadowOffset: { width: 1, height: 1 },
-            textShadowRadius: 1,
-            textShadowColor: '#ccc',
-
-            textShadowOffset: { width: 2, height: 2 },
-            textShadowRadius: 1,
-            textShadowColor: 'black',
-        },
-
-        errorMsgContainer: {
-            display: 'flex',
-            flexDirection: 'row',
-            justifyContent: 'center',
-            alignItems: 'center',
-            padding: 10,
-            marginBottom: 15,
-            marginHorizontal: 20,
-            borderWidth: 1,
-            borderColor: '#D8000C',
-            backgroundColor: "#FFBABA",
-            color: "#D8000C",
-            borderRadius: 25,
-        },
-        successMsgContainer: {
-            display: 'flex',
-            flexDirection: 'row',
-            justifyContent: 'center',
-            alignItems: 'center',
-            padding: 10,
-            marginBottom: 15,
-            marginHorizontal: 20,
-            borderWidth: 1,
-            borderColor: '#4F8A10',
-            backgroundColor: "#DFF2BF",
-            color: "#4F8A10",
-            borderRadius: 25,
-
-        },
         msgText: {
             fontSize: 15,
         },
-        msgIcon: {
-            width: 30,
-            height: 30,
-            // marginLeft: 15,
-            justifyContent: 'center'
-        },
 
-        inputContainer: {
-            // borderBottomColor: '#F5FCFF',
-            backgroundColor: '#FFFFFF',
-            borderRadius: 25,
-            // borderBottomWidth: 1,
-            width: 300,
-            height: 45,
-            marginBottom: 20,
-            flexDirection: 'row',
-            alignItems: 'center',
-
-            shadowColor: "#808080",
-            shadowOffset: {
-                width: 0,
-                height: 2,
-            },
-            shadowOpacity: 0.25,
-            shadowRadius: 3.84,
-
-            elevation: 5,
-        },
-        inputs: {
-            height: 45,
-            marginLeft: 16,
-            borderBottomColor: '#FFFFFF',
-            flex: 1,
-        },
-        inputIcon: {
-            width: 30,
-            height: 30,
-            marginRight: 15,
-            justifyContent: 'center'
-        },
-        buttonContainer: {
-            height: 45,
-            flexDirection: 'row',
-            justifyContent: 'center',
-            alignItems: 'center',
-            marginBottom: 20,
-            width: 300,
-            borderRadius: 25,
-            backgroundColor: 'transparent'
-        },
-        btnForgotPassword: {
-            // height: 15,
-            flexDirection: 'row',
-            justifyContent: 'flex-end',
-            alignItems: 'flex-end',
-            marginBottom: 20,
-            width: 300,
-            backgroundColor: 'transparent',
-        },
-        loginButton: {
-            backgroundColor: Colors.primary,
-
-            shadowColor: "#808080",
-            shadowOffset: {
-                width: 0,
-                height: 9,
-            },
-            shadowOpacity: 0.50,
-            shadowRadius: 12.35,
-
-            elevation: 19,
-        },
-        registerButton: {
-            backgroundColor: Colors.secondary,
-
-            shadowColor: "#808080",
-            shadowOffset: {
-                width: 0,
-                height: 9,
-            },
-            shadowOpacity: 0.50,
-            shadowRadius: 12.35,
-
-            elevation: 19,
-        },
         blackText: {
             color: "black",
             fontWeight: 'bold',
             fontFamily: 'MuseoModerno-SemiBold',
         },
-        bgImage: {
-            flex: 1,
-            position: 'absolute',
-            width: '100%',
-            height: '100%',
-            justifyContent: 'center',
-        },
-        pati: {
-            resizeMode: 'contain',
-            aspectRatio: 1,
-        },
-        whiteText: {
-            color: "white",
-            fontWeight: 'bold'
-        }
+
     });
 
 
@@ -423,127 +218,71 @@ const AuthScreen = (props) => {
 
                 <KeyboardAvoidingView style={styles.screen} behavior={Platform.OS === 'ios' ? 'padding' : 'height'} >
                     {isSignup && (
-                        <>
-                            <View style={Styles.labelContainer} >
-                                <Text style={Styles.labelText} >Name</Text>
-                            </View>
-                            <View style={isNameFocused ? Styles.inputContainerActiveRed : Styles.inputContainerActive}>
-                                <TextInput style={Styles.inputs}
-                                    placeholder="Name"
-                                    underlineColorAndroid='transparent'
-                                    value={name}
-                                    onChangeText={(text) => inputChangeHandler(text, 1)}
-                                    onFocus={() => setIsNameFocused(true)}
-                                    onBlur={() => setIsNameFocused(false)}
-                                />
-                            </View>
-                        </>
+                        <InputWithLabel
+                            placeholder="Name"
+                            label="Name"
+                            inputState={nameState}
+                            onChangeText={setName} />
                     )}
 
-                    <View style={Styles.labelContainer} >
-                        <Text style={Styles.labelText} >Email</Text>
-                    </View>
-                    <View style={isEmailFocused ? Styles.inputContainerActiveRed : Styles.inputContainerActive}>
-                        <TextInput style={Styles.inputs}
-                            placeholder="Email"
-                            keyboardType="email-address"
-                            inputMode='email'
-                            value={email}
-                            onChangeText={(text) => inputChangeHandler(text, 2)}
-                            autoComplete='email'
-                            textContentType='username'
-                            importantForAutofill='yes'
-                            autoCapitalize='none'
-                            onFocus={() => setIsEmailFocused(true)}
-                            onBlur={() => setIsEmailFocused(false)}
-                        />
-                    </View>
+                    <InputWithLabel
+                        placeholder="Email"
+                        label="Email"
+                        inputState={emailState}
+                        onChangeText={setEmail}
+                        keyboardType="email-address"
+                        inputMode='email'
+                        autoComplete='email'
+                        textContentType='username'
+                        importantForAutofill='yes'
+                        autoCapitalize='none'
+                    />
 
-                    <View style={Styles.labelContainer} >
-                        <Text style={Styles.labelText} >Password</Text>
-                    </View>
-                    <View style={isPasswordFocused ? Styles.inputContainerActiveRed : Styles.inputContainerActive}>
-                        <TextInput style={Styles.inputs}
-                            placeholder="Password"
-                            secureTextEntry={true}
-                            value={password}
-                            onChangeText={(text) => inputChangeHandler(text, 3)}
-                            textContentType='password'
-                            autoComplete='password'
-                            importantForAutofill='yes'
-                            onFocus={() => setIsPasswordFocused(true)}
-                            onBlur={() => setIsPasswordFocused(false)}
-
-                        />
-                    </View>
-
-                    {!isSignup && (
-                        <TouchableOpacity
-                            onPress={() => props.navigation.navigate('ForgotPassword')}
-                            style={styles.btnForgotPassword}
-                        >
-                            <Text style={styles.blackText}>Forgot your password?</Text>
-                        </TouchableOpacity>)}
-
-                    <View style={Styles.buttonContainer} >
-                        <TouchableOpacity
-                            style={[Styles.buttonContainer, Styles.buttonPrimary]}
-                            onPress={AuthHandler}
-                        >
-
-                            {isLoading ? (
-                                <ActivityIndicator size="small" color="#fff" />
-                            ) : (
-                                <Text style={Styles.buttonText}>
-                                    {isSignup ? "Register" : "Login"}
-                                </Text>
-                            )}
-
-                        </TouchableOpacity>
-                    </View>
-
-
-                    <View style={Styles.buttonContainer} >
-                        <TouchableOpacity
-                            style={[Styles.buttonContainer, styles.registerButton]}
-                            onPress={() => {
-                                setIsSignUp(prevState => !prevState);
-                            }}
-                        >
-                            <Text style={Styles.buttonText} >
-                                {isSignup ? "Already a user ? Login" : "Don't have an account ? Register"}
-                            </Text>
-                        </TouchableOpacity>
-                    </View>
+                    <InputWithLabel
+                        placeholder="Password"
+                        label="Password"
+                        inputState={passwordState}
+                        onChangeText={setPassword}
+                        secureTextEntry={true}
+                        textContentType='password'
+                        autoComplete='password'
+                        importantForAutofill='yes'
+                    />
                 </KeyboardAvoidingView>
-                {!isSignup && (
+                <View style={{ width: '100%' }}>
+
+                    {!isSignup && (<Button
+                        label={"Forgot your password?"}
+                        onPress={() => props.navigation.navigate('ForgotPassword')}
+                        type='link'
+                        isLoading={isLoading}
+                        style={{ justifyContent: 'flex-end', marginTop: -10 }} />)}
+
+                    <Button
+                        label={isSignup ? "Register" : "Login"}
+                        onPress={AuthHandler}
+                        variant='primary'
+                        round={true}
+                        isLoading={isLoading}
+                    />
+
+                    <Button
+                        label={isSignup ? "Already a user ? Login" : "Don't have an account ? Register"}
+                        onPress={() => { setIsSignUp(prevState => !prevState); }}
+                        isLoading={isLoading}
+                        round={true}
+                        variant='secondary' />
+                </View>
+
+                {/* {!isSignup && (
                     <View style={styles.titleContainer} >
                         <Image source={require('../../assets/pati.gif')} style={styles.pati} />
-                    </View>)}
+                    </View>)} */}
             </LinearGradient>
         </View>
     );
 }
 
-
-export const screenOptions = (navData) => {
-    return {
-        headerTitle: 'Auth',
-    }
-}
-
-
-
-
-const resizeMode = 'center';
-
-
-
-
-
-
-
-
-
+export const screenOptions = (navData) => { headerTitle: 'Auth' };
 
 export default AuthScreen;

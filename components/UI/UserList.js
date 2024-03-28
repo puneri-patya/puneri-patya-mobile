@@ -1,4 +1,4 @@
-import React, {useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
     StyleSheet,
     Text,
@@ -16,6 +16,7 @@ import { useNavigation } from '@react-navigation/native';
 
 import ENV from '../../env';
 import VerifiedUser from '../../constants/VerifiedUser';
+import { showSuccessMessage } from '../../helpers/ShowMessage';
 
 
 const UserList = (props) => {
@@ -31,7 +32,7 @@ const UserList = (props) => {
     const navigation = useNavigation();
 
     const onImageErrorHandler = () => {
-        setImageUri(ENV.defaultImageUri);   
+        setImageUri(ENV.defaultImageUri);
     }
 
     const checkFollow = (userId) => {
@@ -40,45 +41,35 @@ const UserList = (props) => {
     }
 
     const followUserHandler = async () => {
-        if(checkFollow(item._id)){
+        if (checkFollow(item._id)) {
             followHandler(item._id);
-            showMessage({
-                message: `Your are already following ${item.name}.`,
-                type: "success",
-                duration: 3000,
-                icon: { icon: "success", position: 'left' }
-            });
+            showSuccessMessage(`Your are already following ${item.name}.`);
         } else {
             await dispatch(usersActions.followFindPeople(item._id))
             followHandler(item._id);
-            showMessage({
-                message: `Your are now following ${item.name}.`,
-                type: "success",
-                duration: 3000,
-                icon: { icon: "success", position: 'left' }
-            });
+            showSuccessMessage(`Your are now following ${item.name}.`);
             await dispatch(usersActions.followUser(item))
         }
     }
 
     return (
-        <TouchableOpacity 
-            onPress={() => navigation.navigate('UserProfile', {userId: item._id, name: item.name} )}
+        <TouchableOpacity
+            onPress={() => navigation.navigate('UserProfile', { userId: item._id, name: item.name })}
             style={styles.card}
         >
-            <Image 
-                style={styles.userImage} 
+            <Image
+                style={styles.userImage}
                 source={{ uri: imageUri }}
                 onError={onImageErrorHandler}
             />
             <View style={styles.cardFooter}>
                 <View style={{ alignItems: "center", justifyContent: "center" }}>
                     <Text
-                        onPress={() => navigation.navigate('UserProfile',{ userId: item._id, name: item.name} )}
-                        style={{...styles.name, marginRight: 10}}
+                        onPress={() => navigation.navigate('UserProfile', { userId: item._id, name: item.name })}
+                        style={{ ...styles.name, marginRight: 10 }}
                     >
                         {item.name.length > 10 ? (
-                            <>{item.name.substring(0,10)}... </>
+                            <>{item.name.substring(0, 10)}... </>
                         ) : (
                             <>{item.name + " "}</>
                         )}
@@ -88,7 +79,7 @@ const UserList = (props) => {
                     </Text>
                     <Text style={styles.position}>
                         {item.email.length > 15 ? (
-                            <>{item.email.substring(0,15)}...</>
+                            <>{item.email.substring(0, 15)}...</>
                         ) : (
                             <>{item.email}</>
                         )}
